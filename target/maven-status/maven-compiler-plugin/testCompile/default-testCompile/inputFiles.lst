@@ -1,0 +1,7 @@
+/app/applet/src/test/java/com/gaminggear/patterns/DiscountFactoryTest.java
+/app/applet/src/test/java/com/gaminggear/patterns/DiscountStrategyTest.java
+/app/applet/src/test/java/com/gaminggear/patterns/PaymentObserverTest.java
+/app/applet/src/test/java/com/gaminggear/service/BusinessLogicTest.java
+/app/applet/src/test/java/com/gaminggear/service/SystemIntegrationTest.java
+/app/applet/src/test/java/com/gaminggear/ui/SwingSmokeRunner.java
+/app/applet/src/test/java/com/gaminggear/web/JavaApiBridgeServerTest.java

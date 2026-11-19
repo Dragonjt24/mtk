@@ -1,0 +1,685 @@
+{
+  "categories" : [ {
+    "id" : "CAT-01",
+    "name" : "Keyboard",
+    "description" : "Bàn phím cơ Gaming, Rapid Trigger & Custom",
+    "active" : true
+  }, {
+    "id" : "CAT-02",
+    "name" : "Mouse",
+    "description" : "Chuột Gaming siêu nhẹ, không dây độ trễ thấp",
+    "active" : true
+  }, {
+    "id" : "CAT-03",
+    "name" : "Monitor",
+    "description" : "Màn hình Gaming tần số quét cao 165Hz - 360Hz",
+    "active" : true
+  }, {
+    "id" : "CAT-04",
+    "name" : "Headset",
+    "description" : "Tai nghe Gaming vòm 7.1 & không dây độ trễ thấp",
+    "active" : true
+  }, {
+    "id" : "CAT-05",
+    "name" : "Speaker",
+    "description" : "Loa Gaming RGB & Soundbar chuyên nghiệp",
+    "active" : true
+  }, {
+    "id" : "CAT-06",
+    "name" : "Webcam",
+    "description" : "Webcam Full HD / 4K phục vụ Stream & Họp",
+    "active" : true
+  }, {
+    "id" : "CAT-07",
+    "name" : "Controller",
+    "description" : "Tay cầm chơi game PC/Console không dây",
+    "active" : true
+  }, {
+    "id" : "CAT-08",
+    "name" : "Microphone",
+    "description" : "Micro thu âm Condenser & Dynamic cho Streamer",
+    "active" : true
+  }, {
+    "id" : "CAT-09",
+    "name" : "Mouse Pad",
+    "description" : "Lót chuột Speed/Control kích thước lớn",
+    "active" : true
+  } ],
+  "products" : [ {
+    "id" : "PRD-001",
+    "name" : "Wooting 60HE+ Rapid Trigger",
+    "categoryId" : "CAT-01",
+    "brand" : "Wooting",
+    "price" : 4990000,
+    "stockQuantity" : 12,
+    "description" : "Bàn phím từ tính Hall-Effect hỗ trợ Rapid Trigger chuyên FPS.",
+    "imagePath" : "assets/products/wooting60he.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-002",
+    "name" : "Keychron Q1 Pro QMK/VIA",
+    "categoryId" : "CAT-01",
+    "brand" : "Keychron",
+    "price" : 4250000,
+    "stockQuantity" : 9,
+    "description" : "Bàn phím cơ nhôm CNC Gasket Mount kết nối Bluetooth/USB-C.",
+    "imagePath" : "assets/products/keychron_q1_pro.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-003",
+    "name" : "Logitech G Pro X TKL Lightspeed",
+    "categoryId" : "CAT-01",
+    "brand" : "Logitech",
+    "price" : 3890000,
+    "stockQuantity" : 4,
+    "description" : "Bàn phím TKL không dây chuyên thi đấu Esport.",
+    "imagePath" : "assets/products/gprox_tkl.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-004",
+    "name" : "Logitech G Pro X Superlight 2",
+    "categoryId" : "CAT-02",
+    "brand" : "Logitech",
+    "price" : 3590000,
+    "stockQuantity" : 22,
+    "description" : "Chuột không dây siêu nhẹ 60g, cảm biến HERO 2 32K DPI.",
+    "imagePath" : "assets/products/gpx_superlight2.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-005",
+    "name" : "Razer Viper V3 Pro",
+    "categoryId" : "CAT-02",
+    "brand" : "Razer",
+    "price" : 3990000,
+    "stockQuantity" : 16,
+    "description" : "Chuột Esport 54g, polling rate 8000Hz HyperPolling.",
+    "imagePath" : "assets/products/viper_v3_pro.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-006",
+    "name" : "Pulsar X2V2 Wireless",
+    "categoryId" : "CAT-02",
+    "brand" : "Pulsar",
+    "price" : 2450000,
+    "stockQuantity" : 3,
+    "description" : "Chuột đối xứng siêu nhẹ tối ưu kiểu cầm Claw Grip.",
+    "imagePath" : "assets/products/pulsar_x2v2.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-007",
+    "name" : "ASUS ROG Swift PG27AQDM OLED",
+    "categoryId" : "CAT-03",
+    "brand" : "ASUS ROG",
+    "price" : 21900000,
+    "stockQuantity" : 6,
+    "description" : "Màn hình OLED 27 inch 2K 240Hz 0.03ms chuẩn màu điện ảnh.",
+    "imagePath" : "assets/products/rog_pg27aqdm.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-008",
+    "name" : "LG UltraGear 27GR75Q-B 165Hz",
+    "categoryId" : "CAT-03",
+    "brand" : "LG",
+    "price" : 6890000,
+    "stockQuantity" : 12,
+    "description" : "Màn hình IPS 2K 165Hz 1ms G-Sync Compatible.",
+    "imagePath" : "assets/products/lg_27gr75q.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-009",
+    "name" : "BenQ ZOWIE XL2566K 360Hz",
+    "categoryId" : "CAT-03",
+    "brand" : "BenQ ZOWIE",
+    "price" : 15490000,
+    "stockQuantity" : 4,
+    "description" : "Màn hình TN 360Hz công nghệ DyAc+ chuyên CS2/Valorant.",
+    "imagePath" : "assets/products/zowie_xl2566k.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-010",
+    "name" : "HyperX Cloud III Wireless",
+    "categoryId" : "CAT-04",
+    "brand" : "HyperX",
+    "price" : 3690000,
+    "stockQuantity" : 18,
+    "description" : "Tai nghe không dây pin 120 giờ, âm thanh DTS Spatial.",
+    "imagePath" : "assets/products/hyperx_cloud3.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-011",
+    "name" : "SteelSeries Arctis Nova Pro Wireless",
+    "categoryId" : "CAT-04",
+    "brand" : "SteelSeries",
+    "price" : 8990000,
+    "stockQuantity" : 7,
+    "description" : "Tai nghe flagship chống ồn chủ động ANC, pin kép thay nóng.",
+    "imagePath" : "assets/products/arctis_nova_pro.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-012",
+    "name" : "Razer BlackShark V2 Pro 2023",
+    "categoryId" : "CAT-04",
+    "brand" : "Razer",
+    "price" : 4590000,
+    "stockQuantity" : 11,
+    "description" : "Tai nghe Esport micro băng thông siêu rộng.",
+    "imagePath" : "assets/products/blackshark_v2.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-013",
+    "name" : "Razer Leviathan V2 Pro",
+    "categoryId" : "CAT-05",
+    "brand" : "Razer",
+    "price" : 9490000,
+    "stockQuantity" : 5,
+    "description" : "Soundbar Gaming kèm Subwoofer AI Head-Tracking 3D.",
+    "imagePath" : "assets/products/leviathan_v2.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-014",
+    "name" : "Logitech G560 Lightsync RGB",
+    "categoryId" : "CAT-05",
+    "brand" : "Logitech",
+    "price" : 4790000,
+    "stockQuantity" : 10,
+    "description" : "Hệ thống loa 2.1 công suất 240W đồng bộ RGB theo màn hình.",
+    "imagePath" : "assets/products/logitech_g560.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-015",
+    "name" : "Elgato Facecam MK.2",
+    "categoryId" : "CAT-06",
+    "brand" : "Elgato",
+    "price" : 4190000,
+    "stockQuantity" : 13,
+    "description" : "Webcam 1080p60 HDR cảm biến Sony STARVIS cho Streamer.",
+    "imagePath" : "assets/products/elgato_facecam.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-016",
+    "name" : "Logitech Brio 4K Stream Edition",
+    "categoryId" : "CAT-06",
+    "brand" : "Logitech",
+    "price" : 4490000,
+    "stockQuantity" : 8,
+    "description" : "Webcam 4K Ultra HD hỗ trợ Windows Hello và HDR.",
+    "imagePath" : "assets/products/logitech_brio4k.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-017",
+    "name" : "Sony DualSense Edge Wireless",
+    "categoryId" : "CAT-07",
+    "brand" : "Sony",
+    "price" : 5290000,
+    "stockQuantity" : 9,
+    "description" : "Tay cầm Pro cho PS5 & PC tùy biến cần analog và cò bấm.",
+    "imagePath" : "assets/products/dualsense_edge.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-018",
+    "name" : "Xbox Elite Wireless Series 2",
+    "categoryId" : "CAT-07",
+    "brand" : "Microsoft",
+    "price" : 4390000,
+    "stockQuantity" : 2,
+    "description" : "Tay cầm cao cấp với 4 paddle mặt lưng và pin 40 giờ.",
+    "imagePath" : "assets/products/xbox_elite2.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-019",
+    "name" : "Shure MV7X Dynamic Podcast/Stream",
+    "categoryId" : "CAT-08",
+    "brand" : "Shure",
+    "price" : 5490000,
+    "stockQuantity" : 10,
+    "description" : "Micro Dynamic lọc tạp âm phòng cực tốt qua XLR.",
+    "imagePath" : "assets/products/shure_mv7x.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-020",
+    "name" : "HyperX QuadCast S RGB",
+    "categoryId" : "CAT-08",
+    "brand" : "HyperX",
+    "price" : 3590000,
+    "stockQuantity" : 15,
+    "description" : "Micro USB Condenser 4 hướng thu tích hợp chống rung.",
+    "imagePath" : "assets/products/quadcast_s.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-021",
+    "name" : "Artisan Ninja FX Zero Soft XL",
+    "categoryId" : "CAT-09",
+    "brand" : "Artisan",
+    "price" : 1490000,
+    "stockQuantity" : 20,
+    "description" : "Lót chuột Nhật Bản bề mặt Control cân bằng chuẩn Esport.",
+    "imagePath" : "assets/products/artisan_zero.png",
+    "status" : "ACTIVE"
+  }, {
+    "id" : "PRD-022",
+    "name" : "SteelSeries QcK Heavy XXL",
+    "categoryId" : "CAT-09",
+    "brand" : "SteelSeries",
+    "price" : 890000,
+    "stockQuantity" : 28,
+    "description" : "Lót chuột khổ lớn trải bàn dày 4mm chống trượt.",
+    "imagePath" : "assets/products/qck_heavy.png",
+    "status" : "ACTIVE"
+  } ],
+  "customers" : [ {
+    "id" : "CUS-001",
+    "fullName" : "Phạm Gia Huy",
+    "phone" : "0901234567",
+    "email" : "huy.pham@gmail.com",
+    "address" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
+    "membershipTier" : "VIP",
+    "totalSpent" : 26733500
+  }, {
+    "id" : "CUS-002",
+    "fullName" : "Nguyễn Thảo Vy",
+    "phone" : "0912345678",
+    "email" : "vy.nguyen@gmail.com",
+    "address" : "45 Lê Lợi, Hải Châu, Đà Nẵng",
+    "membershipTier" : "VIP",
+    "totalSpent" : 12400000
+  }, {
+    "id" : "CUS-003",
+    "fullName" : "Trần Quốc Bảo",
+    "phone" : "0987654321",
+    "email" : "bao.tran@outlook.com",
+    "address" : "88 Cầu Giấy, Hà Nội",
+    "membershipTier" : "NORMAL",
+    "totalSpent" : 4990000
+  }, {
+    "id" : "CUS-004",
+    "fullName" : "Lê Minh Khoa",
+    "phone" : "0933445566",
+    "email" : "khoa.le@gmail.com",
+    "address" : "210 Cách Mạng Tháng 8, Quận 3, TP.HCM",
+    "membershipTier" : "NORMAL",
+    "totalSpent" : 2380000
+  }, {
+    "id" : "CUS-005",
+    "fullName" : "Đỗ Anh Tuấn",
+    "phone" : "0977889900",
+    "email" : "tuan.do@gmail.com",
+    "address" : "15 Võ Văn Ngân, Thủ Đức, TP.HCM",
+    "membershipTier" : "VIP",
+    "totalSpent" : 21900000
+  } ],
+  "orders" : [ {
+    "id" : "ORD-1001",
+    "customerId" : "CUS-001",
+    "customerName" : "Phạm Gia Huy",
+    "items" : [ {
+      "productId" : "PRD-004",
+      "productName" : "Logitech G Pro X Superlight 2",
+      "quantity" : 1,
+      "unitPrice" : 3590000
+    }, {
+      "productId" : "PRD-021",
+      "productName" : "Artisan Ninja FX Zero Soft XL",
+      "quantity" : 1,
+      "unitPrice" : 1490000
+    } ],
+    "discountType" : "VIP",
+    "discountRate" : 0.15,
+    "originalTotal" : 5080000,
+    "discountAmount" : 762000,
+    "finalTotal" : 4318000,
+    "createdAt" : "2026-11-14T17:11:39.768377549",
+    "status" : "PAID"
+  }, {
+    "id" : "ORD-1002",
+    "customerId" : "CUS-002",
+    "customerName" : "Nguyễn Thảo Vy",
+    "items" : [ {
+      "productId" : "PRD-001",
+      "productName" : "Wooting 60HE+ Rapid Trigger",
+      "quantity" : 1,
+      "unitPrice" : 4990000
+    }, {
+      "productId" : "PRD-010",
+      "productName" : "HyperX Cloud III Wireless",
+      "quantity" : 1,
+      "unitPrice" : 3690000
+    } ],
+    "discountType" : "SEASONAL",
+    "discountRate" : 0.20,
+    "originalTotal" : 8680000,
+    "discountAmount" : 1736000,
+    "finalTotal" : 6944000,
+    "createdAt" : "2026-11-16T17:11:39.768377549",
+    "status" : "PAID"
+  }, {
+    "id" : "ORD-1003",
+    "customerId" : "CUS-003",
+    "customerName" : "Trần Quốc Bảo",
+    "items" : [ {
+      "productId" : "PRD-008",
+      "productName" : "LG UltraGear 27GR75Q-B 165Hz",
+      "quantity" : 1,
+      "unitPrice" : 6890000
+    } ],
+    "discountType" : "NO_DISCOUNT",
+    "discountRate" : 0,
+    "originalTotal" : 6890000,
+    "discountAmount" : 0,
+    "finalTotal" : 6890000,
+    "createdAt" : "2026-11-17T17:11:39.768377549",
+    "status" : "PAID"
+  }, {
+    "id" : "ORD-1004",
+    "customerId" : "CUS-005",
+    "customerName" : "Đỗ Anh Tuấn",
+    "items" : [ {
+      "productId" : "PRD-005",
+      "productName" : "Razer Viper V3 Pro",
+      "quantity" : 1,
+      "unitPrice" : 3990000
+    }, {
+      "productId" : "PRD-022",
+      "productName" : "SteelSeries QcK Heavy XXL",
+      "quantity" : 2,
+      "unitPrice" : 890000
+    } ],
+    "discountType" : "VIP",
+    "discountRate" : 0.15,
+    "originalTotal" : 5770000,
+    "discountAmount" : 865500,
+    "finalTotal" : 4904500,
+    "createdAt" : "2026-11-18T14:11:39.768377549",
+    "status" : "PENDING"
+  }, {
+    "id" : "ORD-1005",
+    "customerId" : "CUS-004",
+    "customerName" : "Lê Minh Khoa",
+    "items" : [ {
+      "productId" : "PRD-020",
+      "productName" : "HyperX QuadCast S RGB",
+      "quantity" : 1,
+      "unitPrice" : 3590000
+    } ],
+    "discountType" : "NO_DISCOUNT",
+    "discountRate" : 0,
+    "originalTotal" : 3590000,
+    "discountAmount" : 0,
+    "finalTotal" : 3590000,
+    "createdAt" : "2026-11-15T17:11:39.768377549",
+    "status" : "CANCELLED"
+  }, {
+    "id" : "ORD-9737AD76",
+    "customerId" : "CUS-001",
+    "customerName" : "Phạm Gia Huy",
+    "items" : [ {
+      "productId" : "PRD-001",
+      "productName" : "Wooting 60HE+ Rapid Trigger",
+      "quantity" : 1,
+      "unitPrice" : 4990000
+    } ],
+    "discountType" : "SEASONAL",
+    "discountRate" : 0.20,
+    "originalTotal" : 4990000,
+    "discountAmount" : 998000,
+    "finalTotal" : 3992000,
+    "createdAt" : "2026-11-18T17:12:24.546381227",
+    "status" : "PAID"
+  }, {
+    "id" : "ORD-BFECB966",
+    "customerId" : "CUS-001",
+    "customerName" : "Phạm Gia Huy",
+    "items" : [ {
+      "productId" : "PRD-001",
+      "productName" : "Wooting 60HE+ Rapid Trigger",
+      "quantity" : 1,
+      "unitPrice" : 4990000
+    } ],
+    "discountType" : "VIP",
+    "discountRate" : 0.15,
+    "originalTotal" : 4990000,
+    "discountAmount" : 748500,
+    "finalTotal" : 4241500,
+    "createdAt" : "2026-11-19T05:29:31.580266463",
+    "status" : "PAID"
+  } ],
+  "payments" : [ {
+    "id" : "PAY-1001",
+    "orderId" : "ORD-1001",
+    "method" : "MOCK_SUCCESS",
+    "amount" : 4318000,
+    "status" : "SUCCESS",
+    "paidAt" : "2026-11-14T17:16:39.768377549",
+    "message" : "Thanh toán thành công qua hệ thống mô phỏng."
+  }, {
+    "id" : "PAY-1002",
+    "orderId" : "ORD-1002",
+    "method" : "COD",
+    "amount" : 6944000,
+    "status" : "SUCCESS",
+    "paidAt" : "2026-11-16T19:11:39.768377549",
+    "message" : "Đã thu tiền COD thành công."
+  }, {
+    "id" : "PAY-1003",
+    "orderId" : "ORD-1003",
+    "method" : "MOCK_SUCCESS",
+    "amount" : 6890000,
+    "status" : "SUCCESS",
+    "paidAt" : "2026-11-17T17:21:39.768377549",
+    "message" : "Thanh toán thành công."
+  }, {
+    "id" : "PAY-5B9EF0DC",
+    "orderId" : "ORD-9737AD76",
+    "method" : "MOCK_FAILURE",
+    "amount" : 3992000,
+    "status" : "FAILED",
+    "paidAt" : "2026-11-18T17:12:32.90289451",
+    "message" : "Thanh toán thất bại (mô phỏng lỗi cổng thanh toán). Đơn hàng giữ nguyên trạng thái PENDING."
+  }, {
+    "id" : "PAY-5955914E",
+    "orderId" : "ORD-9737AD76",
+    "method" : "MOCK_SUCCESS",
+    "amount" : 3992000,
+    "status" : "SUCCESS",
+    "paidAt" : "2026-11-18T17:12:42.269229621",
+    "message" : "Thanh toán trực tuyến mô phỏng thành công."
+  }, {
+    "id" : "PAY-CCC8B225",
+    "orderId" : "ORD-BFECB966",
+    "method" : "MOCK_SUCCESS",
+    "amount" : 4241500,
+    "status" : "SUCCESS",
+    "paidAt" : "2026-11-19T05:29:31.615520008",
+    "message" : "Thanh toán trực tuyến mô phỏng thành công."
+  } ],
+  "bills" : [ {
+    "id" : "BILL-1001",
+    "orderId" : "ORD-1001",
+    "customerId" : "CUS-001",
+    "customerName" : "Phạm Gia Huy",
+    "customerPhone" : "0901234567",
+    "customerAddress" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
+    "items" : [ {
+      "productId" : "PRD-004",
+      "productName" : "Logitech G Pro X Superlight 2",
+      "quantity" : 1,
+      "unitPrice" : 3590000,
+      "lineTotal" : 3590000
+    }, {
+      "productId" : "PRD-021",
+      "productName" : "Artisan Ninja FX Zero Soft XL",
+      "quantity" : 1,
+      "unitPrice" : 1490000,
+      "lineTotal" : 1490000
+    } ],
+    "originalTotal" : 5080000,
+    "discountType" : "VIP",
+    "discountRate" : 0.15,
+    "discountAmount" : 762000,
+    "finalTotal" : 4318000,
+    "issuedAt" : "2026-11-14T17:16:39.768377549",
+    "paymentMethod" : "MOCK_SUCCESS",
+    "paymentStatus" : "SUCCESS"
+  }, {
+    "id" : "BILL-1002",
+    "orderId" : "ORD-1002",
+    "customerId" : "CUS-002",
+    "customerName" : "Nguyễn Thảo Vy",
+    "customerPhone" : "0912345678",
+    "customerAddress" : "45 Lê Lợi, Hải Châu, Đà Nẵng",
+    "items" : [ {
+      "productId" : "PRD-001",
+      "productName" : "Wooting 60HE+ Rapid Trigger",
+      "quantity" : 1,
+      "unitPrice" : 4990000,
+      "lineTotal" : 4990000
+    }, {
+      "productId" : "PRD-010",
+      "productName" : "HyperX Cloud III Wireless",
+      "quantity" : 1,
+      "unitPrice" : 3690000,
+      "lineTotal" : 3690000
+    } ],
+    "originalTotal" : 8680000,
+    "discountType" : "SEASONAL",
+    "discountRate" : 0.20,
+    "discountAmount" : 1736000,
+    "finalTotal" : 6944000,
+    "issuedAt" : "2026-11-16T19:11:39.768377549",
+    "paymentMethod" : "COD",
+    "paymentStatus" : "SUCCESS"
+  }, {
+    "id" : "BILL-1003",
+    "orderId" : "ORD-1003",
+    "customerId" : "CUS-003",
+    "customerName" : "Trần Quốc Bảo",
+    "customerPhone" : "0987654321",
+    "customerAddress" : "88 Cầu Giấy, Hà Nội",
+    "items" : [ {
+      "productId" : "PRD-008",
+      "productName" : "LG UltraGear 27GR75Q-B 165Hz",
+      "quantity" : 1,
+      "unitPrice" : 6890000,
+      "lineTotal" : 6890000
+    } ],
+    "originalTotal" : 6890000,
+    "discountType" : "NO_DISCOUNT",
+    "discountRate" : 0,
+    "discountAmount" : 0,
+    "finalTotal" : 6890000,
+    "issuedAt" : "2026-11-17T17:21:39.768377549",
+    "paymentMethod" : "MOCK_SUCCESS",
+    "paymentStatus" : "SUCCESS"
+  }, {
+    "id" : "BILL-42BD6A2D",
+    "orderId" : "ORD-9737AD76",
+    "customerId" : "CUS-001",
+    "customerName" : "Phạm Gia Huy",
+    "customerPhone" : "0901234567",
+    "customerAddress" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
+    "items" : [ {
+      "productId" : "PRD-001",
+      "productName" : "Wooting 60HE+ Rapid Trigger",
+      "quantity" : 1,
+      "unitPrice" : 4990000,
+      "lineTotal" : 4990000
+    } ],
+    "originalTotal" : 4990000,
+    "discountType" : "SEASONAL",
+    "discountRate" : 0.20,
+    "discountAmount" : 998000,
+    "finalTotal" : 3992000,
+    "issuedAt" : "2026-11-18T17:12:42.275547342",
+    "paymentMethod" : "MOCK_SUCCESS",
+    "paymentStatus" : "SUCCESS"
+  }, {
+    "id" : "BILL-F99ABEFC",
+    "orderId" : "ORD-BFECB966",
+    "customerId" : "CUS-001",
+    "customerName" : "Phạm Gia Huy",
+    "customerPhone" : "0901234567",
+    "customerAddress" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
+    "items" : [ {
+      "productId" : "PRD-001",
+      "productName" : "Wooting 60HE+ Rapid Trigger",
+      "quantity" : 1,
+      "unitPrice" : 4990000,
+      "lineTotal" : 4990000
+    } ],
+    "originalTotal" : 4990000,
+    "discountType" : "VIP",
+    "discountRate" : 0.15,
+    "discountAmount" : 748500,
+    "finalTotal" : 4241500,
+    "issuedAt" : "2026-11-19T05:29:31.62565434",
+    "paymentMethod" : "MOCK_SUCCESS",
+    "paymentStatus" : "SUCCESS"
+  } ],
+  "users" : [ {
+    "id" : "USR-001",
+    "username" : "admin",
+    "password" : "admin123",
+    "fullName" : "Nguyễn Minh Quân (Admin)",
+    "role" : "ADMIN",
+    "active" : true
+  }, {
+    "id" : "USR-002",
+    "username" : "staff01",
+    "password" : "staff123",
+    "fullName" : "Trần Bảo Anh (Nhân viên)",
+    "role" : "STAFF",
+    "active" : true
+  }, {
+    "id" : "USR-003",
+    "username" : "staff02",
+    "password" : "staff123",
+    "fullName" : "Lê Hoàng Phúc (Thu ngân)",
+    "role" : "STAFF",
+    "active" : true
+  } ],
+  "inventoryLogs" : [ {
+    "id" : "INV-001",
+    "productId" : "PRD-004",
+    "productName" : "Logitech G Pro X Superlight 2",
+    "changeAmount" : -1,
+    "previousStock" : 23,
+    "newStock" : 22,
+    "reason" : "Xuất kho đơn hàng ORD-1001",
+    "createdAt" : "2026-11-14T17:16:39.768377549"
+  }, {
+    "id" : "INV-002",
+    "productId" : "PRD-001",
+    "productName" : "Wooting 60HE+ Rapid Trigger",
+    "changeAmount" : -1,
+    "previousStock" : 15,
+    "newStock" : 14,
+    "reason" : "Xuất kho đơn hàng ORD-1002",
+    "createdAt" : "2026-11-16T19:11:39.768377549"
+  }, {
+    "id" : "INV-003",
+    "productId" : "PRD-008",
+    "productName" : "LG UltraGear 27GR75Q-B 165Hz",
+    "changeAmount" : -1,
+    "previousStock" : 13,
+    "newStock" : 12,
+    "reason" : "Xuất kho đơn hàng ORD-1003",
+    "createdAt" : "2026-11-17T17:21:39.768377549"
+  }, {
+    "id" : "INV-1662194E",
+    "productId" : "PRD-001",
+    "productName" : "Wooting 60HE+ Rapid Trigger",
+    "changeAmount" : -1,
+    "previousStock" : 14,
+    "newStock" : 13,
+    "reason" : "Xuất kho đơn hàng ORD-9737AD76",
+    "createdAt" : "2026-11-18T17:12:42.281871791"
+  }, {
+    "id" : "INV-4155E0E2",
+    "productId" : "PRD-001",
+    "productName" : "Wooting 60HE+ Rapid Trigger",
+    "changeAmount" : -1,
+    "previousStock" : 13,
+    "newStock" : 12,
+    "reason" : "Xuất kho đơn hàng ORD-BFECB966",
+    "createdAt" : "2026-11-19T05:29:31.634014892"
+  } ]
+}

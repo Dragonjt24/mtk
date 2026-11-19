@@ -1,0 +1,7 @@
+com/gaminggear/service/BusinessLogicTest.class
+com/gaminggear/ui/SwingSmokeRunner.class
+com/gaminggear/patterns/DiscountFactoryTest.class
+com/gaminggear/patterns/PaymentObserverTest.class
+com/gaminggear/service/SystemIntegrationTest.class
+com/gaminggear/web/JavaApiBridgeServerTest.class
+com/gaminggear/patterns/DiscountStrategyTest.class

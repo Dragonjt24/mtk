@@ -1,0 +1,6 @@
+{
+  "name": "Gaming Gear Management System",
+  "description": "Hệ thống quản lý bán hàng Gaming Gear với Java 17 (Factory, Strategy, Observer Patterns), InMemoryDataStore, JSON Persistence và giao diện quản trị hiện đại.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
