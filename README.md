@@ -1,6 +1,4 @@
-# GAMING GEAR MANAGEMENT SYSTEM
-
-Ứng dụng Desktop quản lý kinh doanh **Gaming Gear** được xây dựng bằng **Java 17**, **Java Swing + FlatLaf (Dark Mode)**, quản lý dữ liệu hoàn toàn trên bộ nhớ bằng Java Collections (`InMemoryDataStore`) kết hợp lưu trữ tệp JSON cục bộ (`JSONStorageService`), **không sử dụng cơ sở dữ liệu (SQL/NoSQL/JDBC/ORM)**.
+# GAMING GEAR 
 
 ---
 
