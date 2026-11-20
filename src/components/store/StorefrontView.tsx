@@ -287,7 +287,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
             }}
             className="font-display whitespace-nowrap shrink-0 text-[15px] font-bold tracking-tight text-slate-100 hover:text-sky-400 sm:text-lg"
           >
-            Gaming Gear Hub
+            Gaming Gear
           </button>
 
           <nav className="hidden md:flex items-center gap-6" aria-label="Điều hướng cửa hàng">
@@ -552,7 +552,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                   </h1>
                   <p className="mt-4 text-sm leading-relaxed text-slate-300 sm:text-base">
                     Chọn bàn phím cơ, chuột siêu nhẹ, màn hình tần số quét cao và tai nghe phòng thu.
-                    Đăng ký tài khoản khách hàng đầy đủ thông tin để đặt hàng, áp dụng ưu đãi và nhận hóa đơn PDF tức thì.
+                    Đăng ký tài khoản khách hàng đầy đủ thông tin để đặt hàng, áp dụng ưu đãi và nhận hóa đơn tức thì.
                   </p>
                 </div>
 
@@ -853,58 +853,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
         </main>
       )}
 
-      {/* Section 4: Store Footer */}
-      <footer className="border-t border-slate-800 bg-[#0F1524]">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-xs text-slate-400 sm:px-6">
-          <div>
-            <p className="font-semibold text-slate-200">
-              {settings?.storeName || 'Gaming Gear Hub'}
-            </p>
-            <p className="mt-1">
-              {settings?.storeAddress || 'TP. Hồ Chí Minh'} · Hotline: {settings?.storePhone || '1900-6868'}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            {!currentUser ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => onOpenAuth('LOGIN')}
-                  className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700"
-                >
-                  Đăng nhập
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenAuth('REGISTER')}
-                  className="whitespace-nowrap shrink-0 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-500"
-                >
-                  Đăng ký
-                </button>
-              </>
-            ) : (
-              <>
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={onOpenAdminWorkspace}
-                    className="whitespace-nowrap shrink-0 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-500"
-                  >
-                    Vào trang Quản trị
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700"
-                >
-                  Đăng xuất
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </footer>
+     
 
       <ProductDetailModal
         product={detailProduct}

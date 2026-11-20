@@ -99,14 +99,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
       <div className={`w-full rounded-xl border border-slate-800 bg-[#111827] p-7 sm:p-8 ${mode === 'REGISTER' ? 'max-w-lg' : 'max-w-md'}`}>
         <div>
           <p className="text-xs font-medium tracking-wide text-sky-400">
-            GAMING GEAR HUB · JAVA 17 CORE
+            GAMING GEAR
           </p>
           <h1 className="font-display mt-2 text-2xl font-semibold text-slate-100">
             {mode === 'LOGIN' ? 'Đăng nhập tài khoản' : 'Đăng ký tài khoản mua hàng'}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
             {mode === 'LOGIN'
-              ? 'Tài khoản Quản trị/Nhân viên mở trang Quản trị; Khách hàng quay lại trang mua sắm.'
+              ? 'Đăng nhập để tiếp tục mua sắm và quản lý đơn hàng của bạn.'
               : 'Điền đầy đủ thông tin liên hệ và địa chỉ giao hàng để kích hoạt mua sắm.'}
           </p>
         </div>
@@ -214,30 +214,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               {loading ? 'Đang xác thực...' : 'Đăng nhập'}
             </button>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('khach01');
-                  setPassword('khach123');
-                  setError(null);
-                }}
-                className="text-sky-400 hover:underline"
-              >
-                Điền thử Khách VIP (khach01)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('admin');
-                  setPassword('admin123');
-                  setError(null);
-                }}
-                className="text-slate-300 hover:text-white hover:underline"
-              >
-                Điền thử Admin (admin)
-              </button>
-            </div>
+          
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="mt-6 space-y-4">
@@ -414,13 +391,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
         )}
 
         <div className="mt-6 space-y-3 border-t border-slate-800 pt-4 text-xs text-slate-400">
-          <p>
-            Demo: <span className="font-mono-tabular text-slate-200">khach01 / khach123</span>
-            {' · '}
-            <span className="font-mono-tabular text-slate-200">admin / admin123</span>
-            {' · '}
-            <span className="font-mono-tabular text-slate-200">staff01 / staff123</span>
-          </p>
+          
           {onBackToStore && (
             <button
               type="button"

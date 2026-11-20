@@ -272,7 +272,7 @@
     "phone" : "0901234567",
     "email" : "huy.pham@gmail.com",
     "address" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
-    "membershipTier" : "VIP",
+    "membershipTier" : "NORMAL",
     "totalSpent" : 18500000
   }, {
     "id" : "CUS-002",
@@ -327,7 +327,7 @@
     "originalTotal" : 5080000,
     "discountAmount" : 762000,
     "finalTotal" : 4318000,
-    "createdAt" : "2026-11-15T22:27:05.939825976",
+    "createdAt" : "2026-11-16T13:38:15.1877528",
     "status" : "PAID"
   }, {
     "id" : "ORD-1002",
@@ -349,7 +349,7 @@
     "originalTotal" : 8680000,
     "discountAmount" : 1736000,
     "finalTotal" : 6944000,
-    "createdAt" : "2026-11-17T22:27:05.939825976",
+    "createdAt" : "2026-11-18T13:38:15.1877528",
     "status" : "PAID"
   }, {
     "id" : "ORD-1003",
@@ -366,7 +366,7 @@
     "originalTotal" : 6890000,
     "discountAmount" : 0,
     "finalTotal" : 6890000,
-    "createdAt" : "2026-11-18T22:27:05.939825976",
+    "createdAt" : "2026-11-19T13:38:15.1877528",
     "status" : "PAID"
   }, {
     "id" : "ORD-1004",
@@ -388,7 +388,7 @@
     "originalTotal" : 5770000,
     "discountAmount" : 865500,
     "finalTotal" : 4904500,
-    "createdAt" : "2026-11-19T19:27:05.939825976",
+    "createdAt" : "2026-11-20T10:38:15.1877528",
     "status" : "PENDING"
   }, {
     "id" : "ORD-1005",
@@ -405,7 +405,7 @@
     "originalTotal" : 3590000,
     "discountAmount" : 0,
     "finalTotal" : 3590000,
-    "createdAt" : "2026-11-16T22:27:05.939825976",
+    "createdAt" : "2026-11-17T13:38:15.1877528",
     "status" : "CANCELLED"
   } ],
   "payments" : [ {
@@ -414,7 +414,7 @@
     "method" : "MOCK_SUCCESS",
     "amount" : 4318000,
     "status" : "SUCCESS",
-    "paidAt" : "2026-11-15T22:32:05.939825976",
+    "paidAt" : "2026-11-16T13:43:15.1877528",
     "message" : "Thanh toán thành công qua hệ thống mô phỏng."
   }, {
     "id" : "PAY-1002",
@@ -422,7 +422,7 @@
     "method" : "COD",
     "amount" : 6944000,
     "status" : "SUCCESS",
-    "paidAt" : "2026-11-18T00:27:05.939825976",
+    "paidAt" : "2026-11-18T15:38:15.1877528",
     "message" : "Đã thu tiền COD thành công."
   }, {
     "id" : "PAY-1003",
@@ -430,7 +430,7 @@
     "method" : "MOCK_SUCCESS",
     "amount" : 6890000,
     "status" : "SUCCESS",
-    "paidAt" : "2026-11-18T22:37:05.939825976",
+    "paidAt" : "2026-11-19T13:48:15.1877528",
     "message" : "Thanh toán thành công."
   } ],
   "bills" : [ {
@@ -458,7 +458,7 @@
     "discountRate" : 0.15,
     "discountAmount" : 762000,
     "finalTotal" : 4318000,
-    "issuedAt" : "2026-11-15T22:32:05.939825976",
+    "issuedAt" : "2026-11-16T13:43:15.1877528",
     "paymentMethod" : "MOCK_SUCCESS",
     "paymentStatus" : "SUCCESS"
   }, {
@@ -486,7 +486,7 @@
     "discountRate" : 0.20,
     "discountAmount" : 1736000,
     "finalTotal" : 6944000,
-    "issuedAt" : "2026-11-18T00:27:05.939825976",
+    "issuedAt" : "2026-11-18T15:38:15.1877528",
     "paymentMethod" : "COD",
     "paymentStatus" : "SUCCESS"
   }, {
@@ -508,7 +508,7 @@
     "discountRate" : 0,
     "discountAmount" : 0,
     "finalTotal" : 6890000,
-    "issuedAt" : "2026-11-18T22:37:05.939825976",
+    "issuedAt" : "2026-11-19T13:48:15.1877528",
     "paymentMethod" : "MOCK_SUCCESS",
     "paymentStatus" : "SUCCESS"
   } ],
@@ -561,7 +561,7 @@
     "previousStock" : 23,
     "newStock" : 22,
     "reason" : "Xuất kho đơn hàng ORD-1001",
-    "createdAt" : "2026-11-15T22:32:05.939825976"
+    "createdAt" : "2026-11-16T13:43:15.1877528"
   }, {
     "id" : "INV-002",
     "productId" : "PRD-001",
@@ -570,7 +570,7 @@
     "previousStock" : 15,
     "newStock" : 14,
     "reason" : "Xuất kho đơn hàng ORD-1002",
-    "createdAt" : "2026-11-18T00:27:05.939825976"
+    "createdAt" : "2026-11-18T15:38:15.1877528"
   }, {
     "id" : "INV-003",
     "productId" : "PRD-008",
@@ -579,12 +579,12 @@
     "previousStock" : 13,
     "newStock" : 12,
     "reason" : "Xuất kho đơn hàng ORD-1003",
-    "createdAt" : "2026-11-18T22:37:05.939825976"
+    "createdAt" : "2026-11-19T13:48:15.1877528"
   } ],
   "promotionConfig" : {
-    "seasonalPromoEnabled" : false,
-    "seasonalPromoName" : "Khuyến mãi sự kiện Gaming Festival",
-    "seasonalDiscountRate" : 0.20,
+    "seasonalPromoEnabled" : true,
+    "seasonalPromoName" : "20 tháng 11",
+    "seasonalDiscountRate" : 0.2,
     "vipDiscountRate" : 0.15
   }
 }
