@@ -1,4 +1,11 @@
-import type {DiscountType, OrderStatus, PaymentMethod, PaymentStatus, ProductStatus} from '../types';
+import type {
+  DiscountType,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+  ProductStatus,
+  PromotionConfig,
+} from '../types';
 
 export function formatVnd(amount: number | string | null | undefined): string {
   const num = Number(amount ?? 0);
@@ -50,14 +57,19 @@ export function productStatusLabel(status: ProductStatus): string {
   }
 }
 
-export function discountLabel(type: DiscountType): string {
+export function discountLabel(type: DiscountType, promoConfig?: PromotionConfig | null): string {
   switch (type) {
     case 'NO_DISCOUNT':
       return 'Không giảm giá (0%)';
-    case 'VIP':
-      return 'Khách hàng VIP (15%)';
-    case 'SEASONAL':
-      return 'Khuyến mãi mùa (20%)';
+    case 'VIP': {
+      const pct = Math.round((promoConfig?.vipDiscountRate ?? 0.15) * 100);
+      return `Khách hàng VIP (${pct}%)`;
+    }
+    case 'SEASONAL': {
+      const pct = Math.round((promoConfig?.seasonalDiscountRate ?? 0.2) * 100);
+      const name = promoConfig?.seasonalPromoName?.trim();
+      return name ? `${name} (${pct}%)` : `Khuyến mãi mùa (${pct}%)`;
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 package com.gaminggear.patterns.factory;
 
 import com.gaminggear.exception.BusinessException;
+import com.gaminggear.model.PromotionConfig;
 import com.gaminggear.patterns.strategy.DiscountStrategy;
 import com.gaminggear.patterns.strategy.NoDiscountStrategy;
 import com.gaminggear.patterns.strategy.SeasonalDiscountStrategy;
@@ -37,6 +38,23 @@ public final class DiscountFactory {
             throw new BusinessException("Không hỗ trợ chính sách giảm giá: " + type);
         }
         return supplier.get();
+    }
+
+    public static DiscountStrategy createStrategy(DiscountType type, PromotionConfig config) {
+        if (config == null) {
+            return createStrategy(type);
+        }
+        if (type == null) {
+            throw new BusinessException("Loại chính sách giảm giá không hợp lệ (null).");
+        }
+        return switch (type) {
+            case NO_DISCOUNT -> new NoDiscountStrategy();
+            case VIP -> new VIPDiscountStrategy(config.getVipDiscountRate());
+            case SEASONAL -> new SeasonalDiscountStrategy(
+                    config.getSeasonalDiscountRate(),
+                    config.getSeasonalPromoName()
+            );
+        };
     }
 
     public static DiscountStrategy createStrategy(String typeCode) {

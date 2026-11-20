@@ -28,6 +28,24 @@ test('status and policy labels return expected Vietnamese labels', () => {
   assert.equal(orderStatusLabel('CANCELLED'), 'Đã hủy');
   assert.equal(productStatusLabel('ACTIVE'), 'Đang kinh doanh');
   assert.equal(discountLabel('VIP'), 'Khách hàng VIP (15%)');
+  assert.equal(
+    discountLabel('SEASONAL', {
+      seasonalPromoEnabled: true,
+      seasonalPromoName: 'Sale Cuối Năm',
+      seasonalDiscountRate: 0.25,
+      vipDiscountRate: 0.18,
+    }),
+    'Sale Cuối Năm (25%)',
+  );
+  assert.equal(
+    discountLabel('VIP', {
+      seasonalPromoEnabled: false,
+      seasonalPromoName: 'Sale Cuối Năm',
+      seasonalDiscountRate: 0.25,
+      vipDiscountRate: 0.18,
+    }),
+    'Khách hàng VIP (18%)',
+  );
   assert.equal(paymentMethodLabel('MOCK_FAILURE'), 'Mô phỏng thất bại');
 });
 

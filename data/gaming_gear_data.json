@@ -51,7 +51,7 @@
     "categoryId" : "CAT-01",
     "brand" : "Wooting",
     "price" : 4990000,
-    "stockQuantity" : 12,
+    "stockQuantity" : 14,
     "description" : "Bàn phím từ tính Hall-Effect hỗ trợ Rapid Trigger chuyên FPS.",
     "imagePath" : "assets/products/wooting60he.png",
     "status" : "ACTIVE"
@@ -273,7 +273,7 @@
     "email" : "huy.pham@gmail.com",
     "address" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
     "membershipTier" : "VIP",
-    "totalSpent" : 26733500
+    "totalSpent" : 18500000
   }, {
     "id" : "CUS-002",
     "fullName" : "Nguyễn Thảo Vy",
@@ -327,7 +327,7 @@
     "originalTotal" : 5080000,
     "discountAmount" : 762000,
     "finalTotal" : 4318000,
-    "createdAt" : "2026-11-14T17:11:39.768377549",
+    "createdAt" : "2026-11-15T22:27:05.939825976",
     "status" : "PAID"
   }, {
     "id" : "ORD-1002",
@@ -349,7 +349,7 @@
     "originalTotal" : 8680000,
     "discountAmount" : 1736000,
     "finalTotal" : 6944000,
-    "createdAt" : "2026-11-16T17:11:39.768377549",
+    "createdAt" : "2026-11-17T22:27:05.939825976",
     "status" : "PAID"
   }, {
     "id" : "ORD-1003",
@@ -366,7 +366,7 @@
     "originalTotal" : 6890000,
     "discountAmount" : 0,
     "finalTotal" : 6890000,
-    "createdAt" : "2026-11-17T17:11:39.768377549",
+    "createdAt" : "2026-11-18T22:27:05.939825976",
     "status" : "PAID"
   }, {
     "id" : "ORD-1004",
@@ -388,7 +388,7 @@
     "originalTotal" : 5770000,
     "discountAmount" : 865500,
     "finalTotal" : 4904500,
-    "createdAt" : "2026-11-18T14:11:39.768377549",
+    "createdAt" : "2026-11-19T19:27:05.939825976",
     "status" : "PENDING"
   }, {
     "id" : "ORD-1005",
@@ -405,42 +405,8 @@
     "originalTotal" : 3590000,
     "discountAmount" : 0,
     "finalTotal" : 3590000,
-    "createdAt" : "2026-11-15T17:11:39.768377549",
+    "createdAt" : "2026-11-16T22:27:05.939825976",
     "status" : "CANCELLED"
-  }, {
-    "id" : "ORD-9737AD76",
-    "customerId" : "CUS-001",
-    "customerName" : "Phạm Gia Huy",
-    "items" : [ {
-      "productId" : "PRD-001",
-      "productName" : "Wooting 60HE+ Rapid Trigger",
-      "quantity" : 1,
-      "unitPrice" : 4990000
-    } ],
-    "discountType" : "SEASONAL",
-    "discountRate" : 0.20,
-    "originalTotal" : 4990000,
-    "discountAmount" : 998000,
-    "finalTotal" : 3992000,
-    "createdAt" : "2026-11-18T17:12:24.546381227",
-    "status" : "PAID"
-  }, {
-    "id" : "ORD-BFECB966",
-    "customerId" : "CUS-001",
-    "customerName" : "Phạm Gia Huy",
-    "items" : [ {
-      "productId" : "PRD-001",
-      "productName" : "Wooting 60HE+ Rapid Trigger",
-      "quantity" : 1,
-      "unitPrice" : 4990000
-    } ],
-    "discountType" : "VIP",
-    "discountRate" : 0.15,
-    "originalTotal" : 4990000,
-    "discountAmount" : 748500,
-    "finalTotal" : 4241500,
-    "createdAt" : "2026-11-19T05:29:31.580266463",
-    "status" : "PAID"
   } ],
   "payments" : [ {
     "id" : "PAY-1001",
@@ -448,7 +414,7 @@
     "method" : "MOCK_SUCCESS",
     "amount" : 4318000,
     "status" : "SUCCESS",
-    "paidAt" : "2026-11-14T17:16:39.768377549",
+    "paidAt" : "2026-11-15T22:32:05.939825976",
     "message" : "Thanh toán thành công qua hệ thống mô phỏng."
   }, {
     "id" : "PAY-1002",
@@ -456,7 +422,7 @@
     "method" : "COD",
     "amount" : 6944000,
     "status" : "SUCCESS",
-    "paidAt" : "2026-11-16T19:11:39.768377549",
+    "paidAt" : "2026-11-18T00:27:05.939825976",
     "message" : "Đã thu tiền COD thành công."
   }, {
     "id" : "PAY-1003",
@@ -464,32 +430,8 @@
     "method" : "MOCK_SUCCESS",
     "amount" : 6890000,
     "status" : "SUCCESS",
-    "paidAt" : "2026-11-17T17:21:39.768377549",
+    "paidAt" : "2026-11-18T22:37:05.939825976",
     "message" : "Thanh toán thành công."
-  }, {
-    "id" : "PAY-5B9EF0DC",
-    "orderId" : "ORD-9737AD76",
-    "method" : "MOCK_FAILURE",
-    "amount" : 3992000,
-    "status" : "FAILED",
-    "paidAt" : "2026-11-18T17:12:32.90289451",
-    "message" : "Thanh toán thất bại (mô phỏng lỗi cổng thanh toán). Đơn hàng giữ nguyên trạng thái PENDING."
-  }, {
-    "id" : "PAY-5955914E",
-    "orderId" : "ORD-9737AD76",
-    "method" : "MOCK_SUCCESS",
-    "amount" : 3992000,
-    "status" : "SUCCESS",
-    "paidAt" : "2026-11-18T17:12:42.269229621",
-    "message" : "Thanh toán trực tuyến mô phỏng thành công."
-  }, {
-    "id" : "PAY-CCC8B225",
-    "orderId" : "ORD-BFECB966",
-    "method" : "MOCK_SUCCESS",
-    "amount" : 4241500,
-    "status" : "SUCCESS",
-    "paidAt" : "2026-11-19T05:29:31.615520008",
-    "message" : "Thanh toán trực tuyến mô phỏng thành công."
   } ],
   "bills" : [ {
     "id" : "BILL-1001",
@@ -516,7 +458,7 @@
     "discountRate" : 0.15,
     "discountAmount" : 762000,
     "finalTotal" : 4318000,
-    "issuedAt" : "2026-11-14T17:16:39.768377549",
+    "issuedAt" : "2026-11-15T22:32:05.939825976",
     "paymentMethod" : "MOCK_SUCCESS",
     "paymentStatus" : "SUCCESS"
   }, {
@@ -544,7 +486,7 @@
     "discountRate" : 0.20,
     "discountAmount" : 1736000,
     "finalTotal" : 6944000,
-    "issuedAt" : "2026-11-16T19:11:39.768377549",
+    "issuedAt" : "2026-11-18T00:27:05.939825976",
     "paymentMethod" : "COD",
     "paymentStatus" : "SUCCESS"
   }, {
@@ -566,51 +508,7 @@
     "discountRate" : 0,
     "discountAmount" : 0,
     "finalTotal" : 6890000,
-    "issuedAt" : "2026-11-17T17:21:39.768377549",
-    "paymentMethod" : "MOCK_SUCCESS",
-    "paymentStatus" : "SUCCESS"
-  }, {
-    "id" : "BILL-42BD6A2D",
-    "orderId" : "ORD-9737AD76",
-    "customerId" : "CUS-001",
-    "customerName" : "Phạm Gia Huy",
-    "customerPhone" : "0901234567",
-    "customerAddress" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
-    "items" : [ {
-      "productId" : "PRD-001",
-      "productName" : "Wooting 60HE+ Rapid Trigger",
-      "quantity" : 1,
-      "unitPrice" : 4990000,
-      "lineTotal" : 4990000
-    } ],
-    "originalTotal" : 4990000,
-    "discountType" : "SEASONAL",
-    "discountRate" : 0.20,
-    "discountAmount" : 998000,
-    "finalTotal" : 3992000,
-    "issuedAt" : "2026-11-18T17:12:42.275547342",
-    "paymentMethod" : "MOCK_SUCCESS",
-    "paymentStatus" : "SUCCESS"
-  }, {
-    "id" : "BILL-F99ABEFC",
-    "orderId" : "ORD-BFECB966",
-    "customerId" : "CUS-001",
-    "customerName" : "Phạm Gia Huy",
-    "customerPhone" : "0901234567",
-    "customerAddress" : "12 Nguyễn Huệ, Quận 1, TP.HCM",
-    "items" : [ {
-      "productId" : "PRD-001",
-      "productName" : "Wooting 60HE+ Rapid Trigger",
-      "quantity" : 1,
-      "unitPrice" : 4990000,
-      "lineTotal" : 4990000
-    } ],
-    "originalTotal" : 4990000,
-    "discountType" : "VIP",
-    "discountRate" : 0.15,
-    "discountAmount" : 748500,
-    "finalTotal" : 4241500,
-    "issuedAt" : "2026-11-19T05:29:31.62565434",
+    "issuedAt" : "2026-11-18T22:37:05.939825976",
     "paymentMethod" : "MOCK_SUCCESS",
     "paymentStatus" : "SUCCESS"
   } ],
@@ -620,21 +518,40 @@
     "password" : "admin123",
     "fullName" : "Nguyễn Minh Quân (Admin)",
     "role" : "ADMIN",
-    "active" : true
+    "active" : true,
+    "customerId" : null
   }, {
     "id" : "USR-002",
     "username" : "staff01",
     "password" : "staff123",
     "fullName" : "Trần Bảo Anh (Nhân viên)",
     "role" : "STAFF",
-    "active" : true
+    "active" : true,
+    "customerId" : null
   }, {
     "id" : "USR-003",
     "username" : "staff02",
     "password" : "staff123",
     "fullName" : "Lê Hoàng Phúc (Thu ngân)",
     "role" : "STAFF",
-    "active" : true
+    "active" : true,
+    "customerId" : null
+  }, {
+    "id" : "USR-004",
+    "username" : "khach01",
+    "password" : "khach123",
+    "fullName" : "Phạm Gia Huy",
+    "role" : "CUSTOMER",
+    "active" : true,
+    "customerId" : "CUS-001"
+  }, {
+    "id" : "USR-005",
+    "username" : "khach02",
+    "password" : "khach123",
+    "fullName" : "Trần Quốc Bảo",
+    "role" : "CUSTOMER",
+    "active" : true,
+    "customerId" : "CUS-003"
   } ],
   "inventoryLogs" : [ {
     "id" : "INV-001",
@@ -644,7 +561,7 @@
     "previousStock" : 23,
     "newStock" : 22,
     "reason" : "Xuất kho đơn hàng ORD-1001",
-    "createdAt" : "2026-11-14T17:16:39.768377549"
+    "createdAt" : "2026-11-15T22:32:05.939825976"
   }, {
     "id" : "INV-002",
     "productId" : "PRD-001",
@@ -653,7 +570,7 @@
     "previousStock" : 15,
     "newStock" : 14,
     "reason" : "Xuất kho đơn hàng ORD-1002",
-    "createdAt" : "2026-11-16T19:11:39.768377549"
+    "createdAt" : "2026-11-18T00:27:05.939825976"
   }, {
     "id" : "INV-003",
     "productId" : "PRD-008",
@@ -662,24 +579,12 @@
     "previousStock" : 13,
     "newStock" : 12,
     "reason" : "Xuất kho đơn hàng ORD-1003",
-    "createdAt" : "2026-11-17T17:21:39.768377549"
-  }, {
-    "id" : "INV-1662194E",
-    "productId" : "PRD-001",
-    "productName" : "Wooting 60HE+ Rapid Trigger",
-    "changeAmount" : -1,
-    "previousStock" : 14,
-    "newStock" : 13,
-    "reason" : "Xuất kho đơn hàng ORD-9737AD76",
-    "createdAt" : "2026-11-18T17:12:42.281871791"
-  }, {
-    "id" : "INV-4155E0E2",
-    "productId" : "PRD-001",
-    "productName" : "Wooting 60HE+ Rapid Trigger",
-    "changeAmount" : -1,
-    "previousStock" : 13,
-    "newStock" : 12,
-    "reason" : "Xuất kho đơn hàng ORD-BFECB966",
-    "createdAt" : "2026-11-19T05:29:31.634014892"
-  } ]
+    "createdAt" : "2026-11-18T22:37:05.939825976"
+  } ],
+  "promotionConfig" : {
+    "seasonalPromoEnabled" : false,
+    "seasonalPromoName" : "Khuyến mãi sự kiện Gaming Festival",
+    "seasonalDiscountRate" : 0.20,
+    "vipDiscountRate" : 0.15
+  }
 }

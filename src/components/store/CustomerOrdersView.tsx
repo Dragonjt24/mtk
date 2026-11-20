@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Download, Printer} from 'lucide-react';
+import {Download, Lock, Printer} from 'lucide-react';
 import {javaApi} from '../../api/javaClient';
-import type {Bill, Customer, Order, PaymentMethod} from '../../types';
+import type {Bill, Customer, Order, PaymentMethod, User} from '../../types';
 import {
   formatDateTime,
   formatVnd,
@@ -11,21 +11,21 @@ import {
 import {ConfirmDialog} from '../ConfirmDialog';
 
 interface CustomerOrdersViewProps {
-  customers: Customer[];
-  selectedCustomerId: string;
-  onSelectCustomerId: (id: string) => void;
+  currentUser: User | null;
+  currentCustomer: Customer | null;
   refreshKey: number;
   onDataChanged: (message: string) => void;
   onBackToCatalog: () => void;
+  onRequireAuth: (mode: 'LOGIN' | 'REGISTER') => void;
 }
 
 export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
-  customers,
-  selectedCustomerId,
-  onSelectCustomerId,
+  currentUser,
+  currentCustomer,
   refreshKey,
   onDataChanged,
   onBackToCatalog,
+  onRequireAuth,
 }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
@@ -36,18 +36,21 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
   const [cancelTarget, setCancelTarget] = useState<Order | null>(null);
   const [previewBill, setPreviewBill] = useState<Bill | null>(null);
 
-  const activeCustomerId = selectedCustomerId || customers[0]?.id || '';
+  const isCustomerLoggedIn = Boolean(
+    currentUser && currentUser.role === 'CUSTOMER' && currentCustomer,
+  );
 
   const loadOrders = useCallback(async () => {
-    if (!activeCustomerId) {
+    if (!isCustomerLoggedIn || !currentCustomer) {
       setOrders([]);
+      setBills([]);
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
       const [custOrders, allBills] = await Promise.all([
-        javaApi.getCustomerOrders(activeCustomerId),
+        javaApi.getCustomerOrders(currentCustomer.id),
         javaApi.getBills(),
       ]);
       setOrders(custOrders);
@@ -58,7 +61,7 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [activeCustomerId]);
+  }, [isCustomerLoggedIn, currentCustomer]);
 
   useEffect(() => {
     loadOrders();
@@ -101,7 +104,48 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
     }
   };
 
-  const activeCustomer = customers.find((c) => c.id === activeCustomerId) ?? null;
+  if (!isCustomerLoggedIn) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center space-y-4">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-[#0B0F19] text-sky-400">
+            <Lock className="h-5 w-5" />
+          </div>
+          <h1 className="font-display text-xl font-semibold text-slate-100">
+            Đăng nhập để xem đơn hàng của bạn
+          </h1>
+          <p className="mx-auto max-w-md text-sm text-slate-400">
+            {currentUser && currentUser.role !== 'CUSTOMER'
+              ? 'Bạn đang đăng nhập tài khoản Quản trị / Nhân viên. Hãy đăng nhập bằng tài khoản Khách hàng để theo dõi đơn mua cá nhân.'
+              : 'Vui lòng đăng nhập tài khoản khách hàng (hoặc đăng ký tài khoản mới) để theo dõi trạng thái đơn hàng và tải hóa đơn PDF.'}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => onRequireAuth('LOGIN')}
+              className="whitespace-nowrap shrink-0 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
+            >
+              Đăng nhập
+            </button>
+            <button
+              type="button"
+              onClick={() => onRequireAuth('REGISTER')}
+              className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-700"
+            >
+              Đăng ký tài khoản
+            </button>
+            <button
+              type="button"
+              onClick={onBackToCatalog}
+              className="whitespace-nowrap shrink-0 rounded-lg border border-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
+            >
+              Quay lại mua sắm
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
@@ -113,44 +157,25 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div>
-            <label htmlFor="my-orders-customer" className="sr-only">
-              Chọn khách hàng xem đơn hàng
-            </label>
-            <select
-              id="my-orders-customer"
-              value={activeCustomerId}
-              onChange={(e) => onSelectCustomerId(e.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-            >
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.fullName} ({c.membershipTier} · {c.phone})
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="button"
-            onClick={onBackToCatalog}
-            className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700"
-          >
-            Quay lại mua sắm
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onBackToCatalog}
+          className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700"
+        >
+          Quay lại mua sắm
+        </button>
       </div>
 
-      {activeCustomer && (
+      {currentCustomer && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-800 bg-[#111827] px-5 py-3.5 text-sm">
           <div className="text-slate-300">
-            Khách hàng: <span className="font-semibold text-slate-100">{activeCustomer.fullName}</span>
-            {' · '}Hạng <span className="font-semibold text-sky-400">{activeCustomer.membershipTier}</span>
-            {' · '}{activeCustomer.address}
+            Khách hàng: <span className="font-semibold text-slate-100">{currentCustomer.fullName}</span>
+            {' · '}Hạng <span className="font-semibold text-sky-400">{currentCustomer.membershipTier}</span>
+            {' · '}{currentCustomer.address}
           </div>
           <div className="font-mono-tabular text-slate-300">
             Tổng chi tiêu tích lũy:{' '}
-            <span className="font-semibold text-emerald-400">{formatVnd(activeCustomer.totalSpent)}</span>
+            <span className="font-semibold text-emerald-400">{formatVnd(currentCustomer.totalSpent)}</span>
           </div>
         </div>
       )}
@@ -167,7 +192,7 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
         </div>
       ) : orders.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-12 text-center">
-          <p className="text-sm text-slate-300">Khách hàng này chưa có đơn hàng nào.</p>
+          <p className="text-sm text-slate-300">Bạn chưa có đơn hàng nào.</p>
           <button
             type="button"
             onClick={onBackToCatalog}

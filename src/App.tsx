@@ -25,13 +25,15 @@ import {DashboardView} from './components/DashboardView';
 import {DiscountsView} from './components/DiscountsView';
 import {InventoryView} from './components/InventoryView';
 import {InvoicesView} from './components/InvoicesView';
-import {LoginView} from './components/LoginView';
+import {LoginView, type AuthFormMode} from './components/LoginView';
 import {OrdersView} from './components/OrdersView';
 import {PaymentsView} from './components/PaymentsView';
 import {ProductsView} from './components/ProductsView';
 import {SettingsView} from './components/SettingsView';
+import type {StoreCartItem} from './components/store/CartCheckoutDrawer';
 import {StorefrontView} from './components/store/StorefrontView';
 import type {ScreenKey, User} from './types';
+import {isAdminStaffRole, resolvePostLoginPortal} from './utils/storeHelpers';
 
 interface NavItem {
   key: ScreenKey;
@@ -55,8 +57,11 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function App() {
-  const [portalMode, setPortalMode] = useState<'STORE' | 'ADMIN'>('STORE');
+  const [portalMode, setPortalMode] = useState<'STORE' | 'AUTH' | 'ADMIN'>('STORE');
+  const [authMode, setAuthMode] = useState<AuthFormMode>('LOGIN');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [cart, setCart] = useState<StoreCartItem[]>([]);
+
   const [activeScreen, setActiveScreen] = useState<ScreenKey>('DASHBOARD');
   const [refreshKey, setRefreshKey] = useState(0);
   const [toast, setToast] = useState<{type: 'success' | 'error'; text: string} | null>(null);
@@ -75,7 +80,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (currentUser) {
+    if (isAdminStaffRole(currentUser)) {
       loadNotifications();
     }
   }, [currentUser, refreshKey, loadNotifications]);
@@ -108,33 +113,55 @@ export default function App() {
     }
     setCurrentUser(null);
     setActiveScreen('DASHBOARD');
+    setPortalMode('STORE');
   };
 
-  if (portalMode === 'STORE') {
-    return (
-      <StorefrontView
-        refreshKey={refreshKey}
-        onDataChanged={handleDataChanged}
-        onOpenAdmin={() => {
-          setRefreshKey((k) => k + 1);
-          setPortalMode('ADMIN');
-        }}
-      />
-    );
-  }
-
-  if (!currentUser) {
+  if (portalMode === 'AUTH') {
     return (
       <LoginView
+        initialMode={authMode}
         onSuccess={(user) => {
           setCurrentUser(user);
-          setActiveScreen('DASHBOARD');
           setRefreshKey((k) => k + 1);
+          const nextPortal = resolvePostLoginPortal(user);
+          if (nextPortal === 'ADMIN') {
+            setActiveScreen('DASHBOARD');
+            setPortalMode('ADMIN');
+          } else {
+            setPortalMode('STORE');
+          }
         }}
         onBackToStore={() => {
           setRefreshKey((k) => k + 1);
           setPortalMode('STORE');
         }}
+      />
+    );
+  }
+
+  if (portalMode === 'STORE' || !isAdminStaffRole(currentUser)) {
+    return (
+      <StorefrontView
+        currentUser={currentUser}
+        onUpdateCurrentUser={(user) => setCurrentUser(user)}
+        cart={cart}
+        onChangeCart={setCart}
+        refreshKey={refreshKey}
+        onDataChanged={handleDataChanged}
+        onOpenAuth={(mode) => {
+          setAuthMode(mode);
+          setPortalMode('AUTH');
+        }}
+        onOpenAdminWorkspace={() => {
+          if (isAdminStaffRole(currentUser)) {
+            setRefreshKey((k) => k + 1);
+            setPortalMode('ADMIN');
+          } else {
+            setAuthMode('LOGIN');
+            setPortalMode('AUTH');
+          }
+        }}
+        onLogout={handleLogout}
       />
     );
   }
@@ -176,9 +203,9 @@ export default function App() {
 
         <div className="border-t border-slate-800 p-4">
           <div className="mb-3">
-            <p className="truncate text-sm font-medium text-slate-100">{currentUser.fullName}</p>
+            <p className="truncate text-sm font-medium text-slate-100">{currentUser?.fullName}</p>
             <p className="text-xs text-slate-400">
-              {currentUser.username} · {currentUser.role}
+              {currentUser?.username} · {currentUser?.role}
             </p>
           </div>
           <button
@@ -309,7 +336,9 @@ export default function App() {
               }}
             />
           )}
-          {activeScreen === 'DISCOUNTS' && <DiscountsView refreshKey={refreshKey} />}
+          {activeScreen === 'DISCOUNTS' && (
+            <DiscountsView refreshKey={refreshKey} onDataChanged={handleDataChanged} />
+          )}
           {activeScreen === 'PAYMENTS' && (
             <PaymentsView
               refreshKey={refreshKey}

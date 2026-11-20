@@ -1,7 +1,8 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {javaApi} from '../api/javaClient';
-import type {Customer, DiscountType, PricingResult, Product} from '../types';
+import type {Customer, DiscountType, PricingResult, Product, PromotionConfig} from '../types';
 import {discountLabel, formatVnd} from '../utils/format';
+import {resolveAutomaticDiscount} from '../utils/storeHelpers';
 
 interface CreateOrderViewProps {
   refreshKey: number;
@@ -20,6 +21,7 @@ export const CreateOrderView: React.FC<CreateOrderViewProps> = ({refreshKey, onO
   const [productSearch, setProductSearch] = useState('');
   const [cart, setCart] = useState<CartEntry[]>([]);
   const [discountType, setDiscountType] = useState<DiscountType>('NO_DISCOUNT');
+  const [promotionConfig, setPromotionConfig] = useState<PromotionConfig | null>(null);
   const [pricing, setPricing] = useState<PricingResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -28,17 +30,22 @@ export const CreateOrderView: React.FC<CreateOrderViewProps> = ({refreshKey, onO
   const loadCatalog = useCallback(async () => {
     setLoading(true);
     try {
-      const [custList, prodList] = await Promise.all([
+      const [custList, prodList, promo] = await Promise.all([
         javaApi.getCustomers(),
         javaApi.getProducts({sort: 'NAME_ASC'}),
+        javaApi.getPromotions(),
       ]);
       setCustomers(custList);
       setProducts(prodList.filter((p) => p.status === 'ACTIVE' && p.stockQuantity > 0));
+      setPromotionConfig(promo);
       if (custList.length > 0 && !selectedCustomerId) {
         const first = custList[0];
         setSelectedCustomerId(first.id);
-        if (first.membershipTier === 'VIP') {
-          setDiscountType('VIP');
+        setDiscountType(resolveAutomaticDiscount(first, promo));
+      } else if (selectedCustomerId) {
+        const currentCust = custList.find((c) => c.id === selectedCustomerId) ?? null;
+        if (currentCust) {
+          setDiscountType(resolveAutomaticDiscount(currentCust, promo));
         }
       }
       setError(null);
@@ -87,12 +94,8 @@ export const CreateOrderView: React.FC<CreateOrderViewProps> = ({refreshKey, onO
 
   const handleCustomerChange = (customerId: string) => {
     setSelectedCustomerId(customerId);
-    const cust = customers.find((c) => c.id === customerId);
-    if (cust?.membershipTier === 'VIP') {
-      setDiscountType('VIP');
-    } else if (discountType === 'VIP') {
-      setDiscountType('NO_DISCOUNT');
-    }
+    const cust = customers.find((c) => c.id === customerId) ?? null;
+    setDiscountType(resolveAutomaticDiscount(cust, promotionConfig));
   };
 
   const addToCart = (product: Product) => {

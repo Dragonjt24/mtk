@@ -6,6 +6,7 @@ import com.gaminggear.model.Customer;
 import com.gaminggear.model.Order;
 import com.gaminggear.model.OrderItem;
 import com.gaminggear.model.Product;
+import com.gaminggear.model.PromotionConfig;
 import com.gaminggear.model.enums.MembershipTier;
 import com.gaminggear.model.enums.OrderStatus;
 import com.gaminggear.model.enums.ProductStatus;
@@ -16,6 +17,7 @@ import com.gaminggear.patterns.strategy.DiscountStrategy;
 import com.gaminggear.repository.CustomerRepository;
 import com.gaminggear.repository.OrderRepository;
 import com.gaminggear.repository.ProductRepository;
+import com.gaminggear.storage.InMemoryDataStore;
 import com.gaminggear.storage.StorageSync;
 import com.gaminggear.util.CurrencyUtil;
 import com.gaminggear.util.IdGenerator;
@@ -50,17 +52,84 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final DiscountContext discountContext;
     private final StorageSync storageSync;
+    private final InMemoryDataStore dataStore;
+    private final PromotionConfig fallbackPromotionConfig = new PromotionConfig();
 
     public OrderService(OrderRepository orderRepository,
                         CustomerRepository customerRepository,
                         ProductRepository productRepository,
                         DiscountContext discountContext,
                         StorageSync storageSync) {
+        this(orderRepository, customerRepository, productRepository, discountContext, storageSync, null);
+    }
+
+    public OrderService(OrderRepository orderRepository,
+                        CustomerRepository customerRepository,
+                        ProductRepository productRepository,
+                        DiscountContext discountContext,
+                        StorageSync storageSync,
+                        InMemoryDataStore dataStore) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.discountContext = discountContext;
         this.storageSync = storageSync;
+        this.dataStore = dataStore;
+    }
+
+    public PromotionConfig getPromotionConfig() {
+        return dataStore != null ? dataStore.getPromotionConfig() : fallbackPromotionConfig;
+    }
+
+    public PromotionConfig updatePromotionConfig(boolean seasonalPromoEnabled,
+                                                 String seasonalPromoName,
+                                                 BigDecimal seasonalDiscountRate,
+                                                 BigDecimal vipDiscountRate) {
+        String cleanName = ValidationUtil.requireNonBlank(seasonalPromoName, "Tên chương trình ưu đãi mùa");
+        if (seasonalDiscountRate == null
+                || seasonalDiscountRate.compareTo(new BigDecimal("0.01")) < 0
+                || seasonalDiscountRate.compareTo(new BigDecimal("0.90")) > 0) {
+            throw new BusinessException("Tỉ lệ giảm giá mùa phải nằm trong khoảng 1% - 90%.");
+        }
+        if (vipDiscountRate == null
+                || vipDiscountRate.compareTo(new BigDecimal("0.01")) < 0
+                || vipDiscountRate.compareTo(new BigDecimal("0.90")) > 0) {
+            throw new BusinessException("Tỉ lệ giảm giá VIP phải nằm trong khoảng 1% - 90%.");
+        }
+
+        PromotionConfig config = getPromotionConfig();
+        config.setSeasonalPromoEnabled(seasonalPromoEnabled);
+        config.setSeasonalPromoName(cleanName);
+        config.setSeasonalDiscountRate(seasonalDiscountRate);
+        config.setVipDiscountRate(vipDiscountRate);
+        if (dataStore != null) {
+            dataStore.setPromotionConfig(config);
+        }
+        persist();
+        return config;
+    }
+
+    /**
+     * Resolves the automatic checkout discount policy controlled by Admin:
+     * 1. When seasonal promotion is active, ALL customer accounts get SEASONAL.
+     * 2. Otherwise VIP accounts get VIP; non-VIP accounts get NO_DISCOUNT.
+     */
+    public DiscountType resolveAutomaticDiscountType(Customer customer) {
+        if (getPromotionConfig().isSeasonalPromoEnabled()) {
+            return DiscountType.SEASONAL;
+        }
+        if (customer != null && customer.getMembershipTier() == MembershipTier.VIP) {
+            return DiscountType.VIP;
+        }
+        return DiscountType.NO_DISCOUNT;
+    }
+
+    public DiscountType resolveAutomaticDiscountTypeForCustomerId(String customerId) {
+        if (customerId == null || customerId.isBlank()) {
+            return getPromotionConfig().isSeasonalPromoEnabled() ? DiscountType.SEASONAL : DiscountType.NO_DISCOUNT;
+        }
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        return resolveAutomaticDiscountType(customer);
     }
 
     public List<Order> getAllOrders() {
@@ -86,7 +155,7 @@ public class OrderService {
     public PricingResult previewPricing(BigDecimal originalTotal, DiscountType discountType) {
         BigDecimal safeOriginal = CurrencyUtil.normalize(
                 ValidationUtil.requireNonNegative(originalTotal, "Tổng tiền ban đầu"));
-        DiscountStrategy strategy = DiscountFactory.createStrategy(discountType);
+        DiscountStrategy strategy = DiscountFactory.createStrategy(discountType, getPromotionConfig());
         discountContext.setStrategy(strategy);
         BigDecimal discountAmount = discountContext.calculateDiscountAmount(safeOriginal);
         BigDecimal finalTotal = discountContext.calculateFinalTotal(safeOriginal);
@@ -98,6 +167,14 @@ public class OrderService {
                 finalTotal,
                 strategy.getDescription()
         );
+    }
+
+    public Order createOrderWithAutoPolicy(String customerId, List<OrderLineRequest> lineRequests) {
+        ValidationUtil.requireNonBlank(customerId, "Khách hàng");
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng: " + customerId));
+        DiscountType automaticType = resolveAutomaticDiscountType(customer);
+        return createOrder(customerId, lineRequests, automaticType);
     }
 
     public Order createOrder(String customerId, List<OrderLineRequest> lineRequests, DiscountType discountType) {

@@ -13,18 +13,25 @@ public class User {
     private String fullName;
     private UserRole role;
     private boolean active;
+    private String customerId;
 
     public User() {
     }
 
     public User(String id, String username, String password, String fullName,
                 UserRole role, boolean active) {
+        this(id, username, password, fullName, role, active, null);
+    }
+
+    public User(String id, String username, String password, String fullName,
+                UserRole role, boolean active, String customerId) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.fullName = fullName;
         this.role = role;
         this.active = active;
+        this.customerId = customerId;
     }
 
     public String getId() {
@@ -73,6 +80,14 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 
     @Override

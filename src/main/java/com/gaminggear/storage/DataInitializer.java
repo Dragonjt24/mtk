@@ -9,6 +9,7 @@ import com.gaminggear.model.Order;
 import com.gaminggear.model.OrderItem;
 import com.gaminggear.model.Payment;
 import com.gaminggear.model.Product;
+import com.gaminggear.model.PromotionConfig;
 import com.gaminggear.model.User;
 import com.gaminggear.model.enums.MembershipTier;
 import com.gaminggear.model.enums.OrderStatus;
@@ -33,6 +34,12 @@ public final class DataInitializer {
 
     public static void initialize(InMemoryDataStore store) {
         store.clearAll();
+        store.setPromotionConfig(new PromotionConfig(
+                false,
+                "Khuyến mãi sự kiện Gaming Festival",
+                new BigDecimal("0.20"),
+                new BigDecimal("0.15")
+        ));
 
         seedUsers(store);
         seedCategories(store);
@@ -45,10 +52,14 @@ public final class DataInitializer {
         User admin = new User("USR-001", "admin", "admin123", "Nguyễn Minh Quân (Admin)", UserRole.ADMIN, true);
         User staff1 = new User("USR-002", "staff01", "staff123", "Trần Bảo Anh (Nhân viên)", UserRole.STAFF, true);
         User staff2 = new User("USR-003", "staff02", "staff123", "Lê Hoàng Phúc (Thu ngân)", UserRole.STAFF, true);
+        User customer1 = new User("USR-004", "khach01", "khach123", "Phạm Gia Huy", UserRole.CUSTOMER, true, "CUS-001");
+        User customer2 = new User("USR-005", "khach02", "khach123", "Trần Quốc Bảo", UserRole.CUSTOMER, true, "CUS-003");
 
         store.getUsers().put(admin.getId(), admin);
         store.getUsers().put(staff1.getId(), staff1);
         store.getUsers().put(staff2.getId(), staff2);
+        store.getUsers().put(customer1.getId(), customer1);
+        store.getUsers().put(customer2.getId(), customer2);
     }
 
     private static void seedCategories(InMemoryDataStore store) {

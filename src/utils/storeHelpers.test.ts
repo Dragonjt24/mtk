@@ -5,7 +5,12 @@ import {
   clampCartQuantity,
   getAvailableDiscountTypes,
   getDefaultDiscountForCustomer,
+  getUserInitials,
+  isAdminStaffRole,
+  isCustomerPurchaseEligible,
   isProductPurchasable,
+  resolveAutomaticDiscount,
+  resolvePostLoginPortal,
   resolveProductImage,
   STORE_IMAGES,
 } from './storeHelpers';
@@ -36,12 +41,20 @@ test('isProductPurchasable requires ACTIVE status and positive stock', () => {
   assert.equal(isProductPurchasable({status: 'INACTIVE', stockQuantity: 10}), false);
 });
 
-test('discount eligibility respects Java VIP rule', () => {
+test('discount eligibility and automatic Admin-controlled policy behave deterministically', () => {
   assert.deepEqual(getAvailableDiscountTypes({membershipTier: 'VIP'}), ['VIP', 'SEASONAL', 'NO_DISCOUNT']);
   assert.deepEqual(getAvailableDiscountTypes({membershipTier: 'NORMAL'}), ['SEASONAL', 'NO_DISCOUNT']);
   assert.deepEqual(getAvailableDiscountTypes(null), ['SEASONAL', 'NO_DISCOUNT']);
+
+  // Seasonal OFF -> VIP gets VIP, NORMAL gets NO_DISCOUNT
+  assert.equal(resolveAutomaticDiscount({membershipTier: 'VIP'}, {seasonalPromoEnabled: false}), 'VIP');
+  assert.equal(resolveAutomaticDiscount({membershipTier: 'NORMAL'}, {seasonalPromoEnabled: false}), 'NO_DISCOUNT');
   assert.equal(getDefaultDiscountForCustomer({membershipTier: 'VIP'}), 'VIP');
   assert.equal(getDefaultDiscountForCustomer({membershipTier: 'NORMAL'}), 'NO_DISCOUNT');
+
+  // Seasonal ON -> ALL accounts (VIP and NORMAL) get SEASONAL
+  assert.equal(resolveAutomaticDiscount({membershipTier: 'VIP'}, {seasonalPromoEnabled: true}), 'SEASONAL');
+  assert.equal(resolveAutomaticDiscount({membershipTier: 'NORMAL'}, {seasonalPromoEnabled: true}), 'SEASONAL');
 });
 
 test('cart quantity clamping and item count calculation behave deterministically', () => {
@@ -51,4 +64,48 @@ test('cart quantity clamping and item count calculation behave deterministically
   assert.equal(clampCartQuantity(2, 0), 0);
   assert.equal(calculateCartCount([{quantity: 2}, {quantity: 3}]), 5);
   assert.equal(calculateCartCount([]), 0);
+});
+
+test('post-login portal routing separates ADMIN/STAFF from CUSTOMER accounts', () => {
+  assert.equal(isAdminStaffRole({role: 'ADMIN'}), true);
+  assert.equal(isAdminStaffRole({role: 'STAFF'}), true);
+  assert.equal(isAdminStaffRole({role: 'CUSTOMER'}), false);
+  assert.equal(resolvePostLoginPortal({role: 'ADMIN'}), 'ADMIN');
+  assert.equal(resolvePostLoginPortal({role: 'STAFF'}), 'ADMIN');
+  assert.equal(resolvePostLoginPortal({role: 'CUSTOMER'}), 'STORE');
+});
+
+test('getUserInitials formats initials cleanly for avatar badges', () => {
+  assert.equal(getUserInitials('Phạm Gia Huy'), 'PH');
+  assert.equal(getUserInitials('Admin'), 'AD');
+  assert.equal(getUserInitials(''), 'GG');
+});
+
+test('customer purchase gate requires active CUSTOMER account linked to complete customer profile', () => {
+  const validCustomer = {
+    id: 'CUS-001',
+    fullName: 'Phạm Gia Huy',
+    phone: '0901234567',
+    email: 'huy@gmail.com',
+    address: '12 Nguyễn Huệ, TP.HCM',
+  };
+  assert.equal(
+    isCustomerPurchaseEligible(
+      {role: 'CUSTOMER', customerId: 'CUS-001', active: true},
+      validCustomer,
+    ),
+    true,
+  );
+  assert.equal(isCustomerPurchaseEligible(null, validCustomer), false);
+  assert.equal(
+    isCustomerPurchaseEligible({role: 'ADMIN', customerId: null, active: true}, validCustomer),
+    false,
+  );
+  assert.equal(
+    isCustomerPurchaseEligible(
+      {role: 'CUSTOMER', customerId: 'CUS-001', active: true},
+      {...validCustomer, address: '   '},
+    ),
+    false,
+  );
 });

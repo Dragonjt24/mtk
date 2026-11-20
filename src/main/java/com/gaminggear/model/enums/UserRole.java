@@ -2,7 +2,8 @@ package com.gaminggear.model.enums;
 
 public enum UserRole {
     ADMIN("Quản trị viên"),
-    STAFF("Nhân viên bán hàng");
+    STAFF("Nhân viên bán hàng"),
+    CUSTOMER("Khách hàng");
 
     private final String displayName;
 

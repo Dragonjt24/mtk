@@ -7,6 +7,7 @@ import com.gaminggear.model.InventoryLog;
 import com.gaminggear.model.Order;
 import com.gaminggear.model.Payment;
 import com.gaminggear.model.Product;
+import com.gaminggear.model.PromotionConfig;
 import com.gaminggear.model.User;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class InMemoryDataStore {
     private final Map<String, Bill> bills = new LinkedHashMap<>();
     private final Map<String, User> users = new LinkedHashMap<>();
     private final List<InventoryLog> inventoryLogs = new ArrayList<>();
+    private PromotionConfig promotionConfig = new PromotionConfig();
 
     public Map<String, Category> getCategories() {
         return categories;
@@ -61,6 +63,17 @@ public class InMemoryDataStore {
         return inventoryLogs;
     }
 
+    public PromotionConfig getPromotionConfig() {
+        if (promotionConfig == null) {
+            promotionConfig = new PromotionConfig();
+        }
+        return promotionConfig;
+    }
+
+    public void setPromotionConfig(PromotionConfig promotionConfig) {
+        this.promotionConfig = promotionConfig == null ? new PromotionConfig() : promotionConfig;
+    }
+
     public synchronized void clearAll() {
         categories.clear();
         products.clear();
@@ -70,6 +83,7 @@ public class InMemoryDataStore {
         bills.clear();
         users.clear();
         inventoryLogs.clear();
+        promotionConfig = new PromotionConfig();
     }
 
     public synchronized DataSnapshot toSnapshot() {
@@ -82,6 +96,7 @@ public class InMemoryDataStore {
         snapshot.setBills(new ArrayList<>(bills.values()));
         snapshot.setUsers(new ArrayList<>(users.values()));
         snapshot.setInventoryLogs(new ArrayList<>(inventoryLogs));
+        snapshot.setPromotionConfig(getPromotionConfig());
         return snapshot;
     }
 
@@ -141,6 +156,9 @@ public class InMemoryDataStore {
         }
         if (snapshot.getInventoryLogs() != null) {
             inventoryLogs.addAll(snapshot.getInventoryLogs());
+        }
+        if (snapshot.getPromotionConfig() != null) {
+            this.promotionConfig = snapshot.getPromotionConfig();
         }
     }
 }

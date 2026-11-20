@@ -287,7 +287,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({refreshKey, onDataCha
                     <td className="font-mono-tabular py-2.5 pr-3 text-sky-400">{u.id}</td>
                     <td className="font-mono-tabular py-2.5 pr-3 text-slate-100">{u.username}</td>
                     <td className="py-2.5 pr-3 text-slate-200">{u.fullName}</td>
-                    <td className="py-2.5 pr-3 text-xs text-slate-300">{u.role}</td>
+                    <td className="py-2.5 pr-3 text-xs text-slate-300">
+                      {u.role === 'CUSTOMER' ? 'Khách hàng (CUSTOMER)' : u.role}
+                    </td>
                     <td
                       className={`py-2.5 pr-3 text-xs font-medium ${
                         u.active ? 'text-emerald-400' : 'text-rose-400'

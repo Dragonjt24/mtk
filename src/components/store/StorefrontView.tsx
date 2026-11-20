@@ -1,32 +1,67 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {ArrowRight, Search, ShoppingBag, X} from 'lucide-react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+  ArrowRight,
+  ChevronDown,
+  LogOut,
+  Package,
+  Percent,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  UserCog,
+  X,
+} from 'lucide-react';
 import {javaApi} from '../../api/javaClient';
-import type {AppSettings, Category, Customer, DiscountInfo, Product} from '../../types';
+import type {
+  AppSettings,
+  Category,
+  Customer,
+  DiscountInfo,
+  Product,
+  PromotionConfig,
+  User,
+} from '../../types';
 import {formatVnd} from '../../utils/format';
 import {
   STORE_IMAGES,
   calculateCartCount,
   clampCartQuantity,
+  getUserInitials,
+  isAdminStaffRole,
   isProductPurchasable,
+  resolveAutomaticDiscount,
   resolveProductImage,
 } from '../../utils/storeHelpers';
 import {CartCheckoutDrawer, type StoreCartItem} from './CartCheckoutDrawer';
 import {CustomerOrdersView} from './CustomerOrdersView';
 import {ProductDetailModal} from './ProductDetailModal';
 import {ProductImage} from './ProductImage';
+import {UserProfileModal} from './UserProfileModal';
 
 interface StorefrontViewProps {
+  currentUser: User | null;
+  onUpdateCurrentUser: (user: User) => void;
+  cart: StoreCartItem[];
+  onChangeCart: React.Dispatch<React.SetStateAction<StoreCartItem[]>>;
   refreshKey: number;
   onDataChanged: (message?: string) => void;
-  onOpenAdmin: () => void;
+  onOpenAuth: (mode: 'LOGIN' | 'REGISTER') => void;
+  onOpenAdminWorkspace: () => void;
+  onLogout: () => void;
 }
 
 type StoreSubPage = 'CATALOG' | 'MY_ORDERS';
 
 export const StorefrontView: React.FC<StorefrontViewProps> = ({
+  currentUser,
+  onUpdateCurrentUser,
+  cart,
+  onChangeCart,
   refreshKey,
   onDataChanged,
-  onOpenAdmin,
+  onOpenAuth,
+  onOpenAdminWorkspace,
+  onLogout,
 }) => {
   const [subPage, setSubPage] = useState<StoreSubPage>('CATALOG');
   const [categories, setCategories] = useState<Category[]>([]);
@@ -34,6 +69,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [discounts, setDiscounts] = useState<DiscountInfo[]>([]);
+  const [promotionConfig, setPromotionConfig] = useState<PromotionConfig | null>(null);
   const [settings, setSettings] = useState<AppSettings | null>(null);
 
   const [keyword, setKeyword] = useState('');
@@ -43,11 +79,12 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
   const [loadingCatalog, setLoadingCatalog] = useState(true);
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
-  const [cart, setCart] = useState<StoreCartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [storeToast, setStoreToast] = useState<{type: 'success' | 'error'; text: string} | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!storeToast) return;
@@ -55,23 +92,42 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
     return () => window.clearTimeout(timer);
   }, [storeToast]);
 
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [userMenuOpen]);
+
   const loadMetadata = useCallback(async () => {
     try {
-      const [cats, brs, custs, discs, appSettings] = await Promise.all([
+      const [cats, brs, custs, discs, promo, appSettings] = await Promise.all([
         javaApi.getCategories(),
         javaApi.getBrands(),
         javaApi.getCustomers(),
         javaApi.getDiscounts(),
+        javaApi.getPromotions(),
         javaApi.getSettings(),
       ]);
       setCategories(cats);
       setBrands(brs);
       setCustomers(custs);
       setDiscounts(discs);
+      setPromotionConfig(promo);
       setSettings(appSettings);
-      setSelectedCustomerId((prev) =>
-        prev && custs.some((c) => c.id === prev) ? prev : (custs[0]?.id ?? ''),
-      );
     } catch (err) {
       setCatalogError(err instanceof Error ? err.message : 'Không tải được dữ liệu cửa hàng.');
     }
@@ -107,7 +163,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
   useEffect(() => {
     if (products.length === 0) return;
     const byId = new Map(products.map((p) => [p.id, p]));
-    setCart((prev) => {
+    onChangeCart((prev) => {
       let changed = false;
       const next: StoreCartItem[] = [];
       for (const entry of prev) {
@@ -134,7 +190,14 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
       }
       return changed ? next : prev;
     });
-  }, [products]);
+  }, [products, onChangeCart]);
+
+  const currentCustomer = useMemo(() => {
+    if (!currentUser || currentUser.role !== 'CUSTOMER' || !currentUser.customerId) {
+      return null;
+    }
+    return customers.find((c) => c.id === currentUser.customerId) ?? null;
+  }, [currentUser, customers]);
 
   const categoryMap = useMemo(() => {
     const map = new Map<string, Category>();
@@ -147,7 +210,6 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
     [categories],
   );
 
-  // Respect active category setting from Admin when displaying storefront catalog
   const visibleProducts = useMemo(() => {
     if (categories.length === 0) return products;
     return products.filter((p) => {
@@ -164,7 +226,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
       return;
     }
 
-    setCart((prev) => {
+    onChangeCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
       const nextDesired = (existing?.quantity ?? 0) + quantity;
       const clamped = clampCartQuantity(nextDesired, product.stockQuantity);
@@ -184,7 +246,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
   };
 
   const handleUpdateCartQty = (productId: string, delta: number) => {
-    setCart((prev) =>
+    onChangeCart((prev) =>
       prev
         .map((entry) => {
           if (entry.product.id !== productId) return entry;
@@ -198,7 +260,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
   };
 
   const handleRemoveCartItem = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+    onChangeCart((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
   const jumpToSection = (sectionId: string) => {
@@ -208,18 +270,22 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
     }, 50);
   };
 
+  const isAdmin = isAdminStaffRole(currentUser);
+  const displayName = currentCustomer?.fullName || currentUser?.fullName || '';
+  const activePolicyForViewer = resolveAutomaticDiscount(currentCustomer, promotionConfig);
+
   return (
     <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col">
-      {/* Strict 3-Zone Single-Row Top Bar */}
+      {/* Strict 3-Zone Single-Row Top Bar: Brand left | Store links center | Cart & Auth/User Avatar right */}
       <header className="sticky top-0 z-40 border-b border-slate-800 bg-[#0F1524]/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
           <button
             type="button"
             onClick={() => {
               setSubPage('CATALOG');
               window.scrollTo({top: 0, behavior: 'smooth'});
             }}
-            className="font-display whitespace-nowrap shrink-0 text-lg font-bold tracking-tight text-slate-100 hover:text-sky-400"
+            className="font-display whitespace-nowrap shrink-0 text-[15px] font-bold tracking-tight text-slate-100 hover:text-sky-400 sm:text-lg"
           >
             Gaming Gear Hub
           </button>
@@ -250,27 +316,166 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
             >
               Đơn hàng của tôi
             </button>
-            <button
-              type="button"
-              onClick={onOpenAdmin}
-              className="whitespace-nowrap shrink-0 text-sm font-medium text-slate-300 transition-colors hover:text-sky-400"
-            >
-              Quản trị viên
-            </button>
           </nav>
 
-          <button
-            type="button"
-            onClick={() => setCartOpen(true)}
-            className="inline-flex whitespace-nowrap shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            <span>Giỏ hàng ({cartCount})</span>
-          </button>
+          {/* Top-Right Corner: Cart + Login/Register OR User Avatar Dropdown */}
+          <div className="flex items-center gap-1.5 shrink-0 sm:gap-2">
+            <button
+              type="button"
+              onClick={() => setCartOpen(true)}
+              aria-label={`Mở giỏ hàng (${cartCount} sản phẩm)`}
+              className="inline-flex whitespace-nowrap shrink-0 items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs font-semibold text-slate-100 hover:bg-slate-700 sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm"
+            >
+              <ShoppingBag className="h-3.5 w-3.5 text-sky-400 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Giỏ hàng ({cartCount})</span>
+              <span className="sm:hidden">Giỏ ({cartCount})</span>
+            </button>
+
+            {!currentUser ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('LOGIN')}
+                  className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800 sm:px-3.5 sm:py-2 sm:text-sm"
+                >
+                  Đăng nhập
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('REGISTER')}
+                  className="whitespace-nowrap shrink-0 rounded-lg bg-blue-600 px-2 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 sm:px-3.5 sm:py-2 sm:text-sm"
+                >
+                  Đăng ký
+                </button>
+              </>
+            ) : (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  aria-label="Mở menu tài khoản người dùng"
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="menu"
+                  className="inline-flex whitespace-nowrap shrink-0 items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm font-medium text-slate-100 hover:border-sky-500/70 hover:bg-slate-800 sm:gap-2"
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                    {getUserInitials(displayName)}
+                  </span>
+                  <span className="hidden max-w-[130px] truncate sm:inline">{displayName}</span>
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                </button>
+
+                {userMenuOpen && (
+                  <div
+                    role="menu"
+                    aria-label="Tùy chọn tài khoản"
+                    className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-xl border border-slate-800 bg-[#111827] p-2 shadow-2xl"
+                  >
+                    <div className="border-b border-slate-800 px-3 py-2.5">
+                      <p className="truncate text-sm font-semibold text-slate-100">{displayName}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        @{currentUser.username} ·{' '}
+                        {currentUser.role === 'CUSTOMER' && currentCustomer
+                          ? `Thành viên ${currentCustomer.membershipTier}`
+                          : currentUser.role}
+                      </p>
+                      {currentCustomer?.email && (
+                        <p className="mt-0.5 truncate text-xs text-slate-500">{currentCustomer.email}</p>
+                      )}
+                    </div>
+
+                    <div className="py-1.5 space-y-0.5">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          setProfileModalOpen(true);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-800"
+                      >
+                        <UserCog className="h-4 w-4 text-sky-400" />
+                        <span>Chỉnh sửa thông tin</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          setSubPage('MY_ORDERS');
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-800"
+                      >
+                        <Package className="h-4 w-4 text-emerald-400" />
+                        <span>Theo dõi đơn hàng</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          setCartOpen(true);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-800"
+                      >
+                        <ShoppingBag className="h-4 w-4 text-blue-400" />
+                        <span>Giỏ hàng của tôi ({cartCount})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          jumpToSection('store-discounts');
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-800"
+                      >
+                        <Percent className="h-4 w-4 text-amber-400" />
+                        <span>Chính sách ưu đãi đang bật</span>
+                      </button>
+
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            onOpenAdminWorkspace();
+                          }}
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-sky-300 hover:bg-slate-800"
+                        >
+                          <ShieldCheck className="h-4 w-4 text-sky-400" />
+                          <span>Vào trang Quản trị</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="border-t border-slate-800 pt-1.5">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          onLogout();
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-rose-300 hover:bg-rose-950/40"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Đăng xuất</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Mobile sub-navigation bar to prevent wrapping/overflow on 390px */}
-        <div className="flex md:hidden items-center gap-5 overflow-x-auto border-t border-slate-800/80 px-4 py-2.5">
+        {/* Mobile sub-navigation bar */}
+        <div className="flex md:hidden items-center justify-around gap-3 border-t border-slate-800/80 px-4 py-2">
           <button
             type="button"
             onClick={() => jumpToSection('store-catalog')}
@@ -293,13 +498,6 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
             }`}
           >
             Đơn hàng của tôi
-          </button>
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="whitespace-nowrap shrink-0 text-xs font-medium text-slate-300"
-          >
-            Quản trị viên
           </button>
         </div>
       </header>
@@ -328,15 +526,15 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
       {subPage === 'MY_ORDERS' ? (
         <main className="flex-1">
           <CustomerOrdersView
-            customers={customers}
-            selectedCustomerId={selectedCustomerId}
-            onSelectCustomerId={setSelectedCustomerId}
+            currentUser={currentUser}
+            currentCustomer={currentCustomer}
             refreshKey={refreshKey}
             onDataChanged={(msg) => {
               setStoreToast({type: 'success', text: msg});
               onDataChanged(msg);
             }}
             onBackToCatalog={() => setSubPage('CATALOG')}
+            onRequireAuth={(mode) => onOpenAuth(mode)}
           />
         </main>
       ) : (
@@ -354,7 +552,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                   </h1>
                   <p className="mt-4 text-sm leading-relaxed text-slate-300 sm:text-base">
                     Chọn bàn phím cơ, chuột siêu nhẹ, màn hình tần số quét cao và tai nghe phòng thu.
-                    Mọi đơn hàng, tồn kho và hóa đơn PDF đều đồng bộ trực tiếp theo thời gian thực với hệ thống quản trị Java 17.
+                    Đăng ký tài khoản khách hàng đầy đủ thông tin để đặt hàng, áp dụng ưu đãi và nhận hóa đơn PDF tức thì.
                   </p>
                 </div>
 
@@ -367,13 +565,23 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                     Khám phá sản phẩm
                     <ArrowRight className="h-4 w-4" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setSubPage('MY_ORDERS')}
-                    className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-700"
-                  >
-                    Theo dõi đơn hàng
-                  </button>
+                  {!currentUser ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenAuth('REGISTER')}
+                      className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-700"
+                    >
+                      Đăng ký tài khoản mua hàng
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setSubPage('MY_ORDERS')}
+                      className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-700"
+                    >
+                      Theo dõi đơn hàng
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -594,7 +802,9 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                     Chính sách ưu đãi áp dụng khi thanh toán
                   </h2>
                   <p className="mt-1 text-sm text-slate-400">
-                    Tính toán tự động qua Factory & Strategy Pattern trên máy chủ Java 17
+                    {promotionConfig?.seasonalPromoEnabled
+                      ? `Ưu đãi theo mùa "${promotionConfig.seasonalPromoName}" đang BẬT cho toàn bộ tài khoản (-${Math.round(promotionConfig.seasonalDiscountRate * 100)}%).`
+                      : `Chế độ mặc định theo hạng tài khoản: VIP được giảm ${Math.round((promotionConfig?.vipDiscountRate ?? 0.15) * 100)}%, tài khoản thường không giảm giá (0%) khi chưa có ưu đãi mùa.`}
                   </p>
                 </div>
                 <button
@@ -602,27 +812,41 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                   onClick={() => setCartOpen(true)}
                   className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-100 hover:bg-slate-700"
                 >
-                  Mở giỏ hàng áp dụng ngay
+                  Mở giỏ hàng kiểm tra ưu đãi
                 </button>
               </div>
 
               <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                {discounts.map((d) => (
-                  <div
-                    key={d.type}
-                    className="rounded-xl border border-slate-800 bg-[#0B0F19] p-5"
-                  >
-                    <p className="font-mono-tabular text-2xl font-bold text-sky-400">
-                      -{Math.round(d.rate * 100)}%
-                    </p>
-                    <h3 className="font-display mt-2 text-base font-semibold text-slate-100">
-                      {d.displayName}
-                    </h3>
-                    <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                      {d.description}
-                    </p>
-                  </div>
-                ))}
+                {discounts.map((d) => {
+                  const isHighlighted = d.type === activePolicyForViewer;
+                  return (
+                    <div
+                      key={d.type}
+                      className={`rounded-xl border p-5 ${
+                        isHighlighted
+                          ? 'border-sky-500/80 bg-[#0F1A2E]'
+                          : 'border-slate-800 bg-[#0B0F19]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-mono-tabular text-2xl font-bold text-sky-400">
+                          -{Math.round(d.rate * 100)}%
+                        </p>
+                        {isHighlighted && (
+                          <span className="text-xs font-semibold text-emerald-400">
+                            Đang áp dụng cho bạn
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-display mt-2 text-base font-semibold text-slate-100">
+                        {d.displayName}
+                      </h3>
+                      <p className="mt-2 text-xs leading-relaxed text-slate-400">
+                        {d.description}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -640,13 +864,45 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
               {settings?.storeAddress || 'TP. Hồ Chí Minh'} · Hotline: {settings?.storePhone || '1900-6868'}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700"
-          >
-            Truy cập Cổng Quản trị (Admin)
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {!currentUser ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('LOGIN')}
+                  className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700"
+                >
+                  Đăng nhập
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('REGISTER')}
+                  className="whitespace-nowrap shrink-0 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-500"
+                >
+                  Đăng ký
+                </button>
+              </>
+            ) : (
+              <>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={onOpenAdminWorkspace}
+                    className="whitespace-nowrap shrink-0 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-500"
+                  >
+                    Vào trang Quản trị
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="whitespace-nowrap shrink-0 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700"
+                >
+                  Đăng xuất
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </footer>
 
@@ -660,13 +916,14 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
       <CartCheckoutDrawer
         open={cartOpen}
         cart={cart}
-        customers={customers}
-        selectedCustomerId={selectedCustomerId}
-        onSelectCustomerId={setSelectedCustomerId}
+        currentUser={currentUser}
+        currentCustomer={currentCustomer}
+        promotionConfig={promotionConfig}
         onUpdateQty={handleUpdateCartQty}
         onRemoveItem={handleRemoveCartItem}
-        onClearCart={() => setCart([])}
+        onClearCart={() => onChangeCart([])}
         onClose={() => setCartOpen(false)}
+        onRequireAuth={(mode) => onOpenAuth(mode)}
         onCheckoutCompleted={(outcome) => {
           setStoreToast({
             type: 'success',
@@ -674,11 +931,19 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
           });
           onDataChanged();
         }}
-        onOpenMyOrders={(customerId) => {
-          setSelectedCustomerId(customerId);
-          setSubPage('MY_ORDERS');
+        onOpenMyOrders={() => setSubPage('MY_ORDERS')}
+      />
+
+      <UserProfileModal
+        open={profileModalOpen}
+        currentUser={currentUser}
+        currentCustomer={currentCustomer}
+        onClose={() => setProfileModalOpen(false)}
+        onProfileUpdated={({user}) => {
+          onUpdateCurrentUser(user);
+          setStoreToast({type: 'success', text: 'Đã cập nhật thông tin tài khoản thành công.'});
+          onDataChanged();
         }}
-        onSwitchToAdmin={onOpenAdmin}
       />
     </div>
   );

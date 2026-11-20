@@ -8,6 +8,7 @@ import com.gaminggear.model.InventoryLog;
 import com.gaminggear.model.Order;
 import com.gaminggear.model.Payment;
 import com.gaminggear.model.Product;
+import com.gaminggear.model.PromotionConfig;
 import com.gaminggear.model.User;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class DataSnapshot {
     private List<Bill> bills = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private List<InventoryLog> inventoryLogs = new ArrayList<>();
+    private PromotionConfig promotionConfig = new PromotionConfig();
 
     public List<Category> getCategories() {
         return categories;
@@ -89,5 +91,13 @@ public class DataSnapshot {
 
     public void setInventoryLogs(List<InventoryLog> inventoryLogs) {
         this.inventoryLogs = inventoryLogs == null ? new ArrayList<>() : inventoryLogs;
+    }
+
+    public PromotionConfig getPromotionConfig() {
+        return promotionConfig;
+    }
+
+    public void setPromotionConfig(PromotionConfig promotionConfig) {
+        this.promotionConfig = promotionConfig == null ? new PromotionConfig() : promotionConfig;
     }
 }

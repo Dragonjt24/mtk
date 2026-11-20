@@ -14,6 +14,7 @@ import type {
   PricingResult,
   Product,
   ProductStatus,
+  PromotionConfig,
   User,
   UserRole,
 } from '../types';
@@ -46,6 +47,18 @@ export const javaApi = {
       method: 'POST',
       body: JSON.stringify({username, password}),
     }),
+  registerCustomer: (payload: {
+    username: string;
+    password: string;
+    fullName: string;
+    phone: string;
+    email: string;
+    address: string;
+  }) =>
+    request<User>('/api/java/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   logout: () => request<{loggedOut: boolean}>('/api/java/auth/logout', {method: 'POST'}),
   getUsers: () => request<User[]>('/api/java/auth/users'),
   createUser: (payload: {username: string; password: string; fullName: string; role: UserRole}) =>
@@ -59,6 +72,18 @@ export const javaApi = {
     request<{updated: boolean}>(`/api/java/auth/users/${encodeURIComponent(id)}/password`, {
       method: 'PUT',
       body: JSON.stringify({newPassword}),
+    }),
+  updateCustomerProfile: (payload: {
+    userId: string;
+    fullName: string;
+    phone: string;
+    email: string;
+    address: string;
+    newPassword?: string;
+  }) =>
+    request<{user: User; customer: Customer | null}>('/api/java/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
     }),
 
   // Dashboard
@@ -161,16 +186,32 @@ export const javaApi = {
 
   // Discounts & Orders
   getDiscounts: () => request<DiscountInfo[]>('/api/java/discounts'),
-  previewPricing: (originalTotal: number, discountType: DiscountType) =>
+  getPromotions: () => request<PromotionConfig>('/api/java/promotions'),
+  updatePromotions: (payload: PromotionConfig) =>
+    request<PromotionConfig>('/api/java/promotions', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  previewPricing: (
+    originalTotal: number,
+    discountType?: DiscountType,
+    options?: {customerId?: string; useAutoPolicy?: boolean},
+  ) =>
     request<PricingResult>('/api/java/orders/preview-pricing', {
       method: 'POST',
-      body: JSON.stringify({originalTotal, discountType}),
+      body: JSON.stringify({
+        originalTotal,
+        discountType,
+        customerId: options?.customerId,
+        useAutoPolicy: options?.useAutoPolicy ?? false,
+      }),
     }),
   getOrders: (status = 'ALL') =>
     request<Order[]>(`/api/java/orders?status=${encodeURIComponent(status)}`),
   createOrder: (payload: {
     customerId: string;
-    discountType: DiscountType;
+    discountType?: DiscountType;
+    useAutoPolicy?: boolean;
     items: Array<{productId: string; quantity: number}>;
   }) => request<Order>('/api/java/orders', {method: 'POST', body: JSON.stringify(payload)}),
   changeOrderDiscount: (id: string, discountType: DiscountType) =>

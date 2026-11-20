@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'STAFF';
+export type UserRole = 'ADMIN' | 'STAFF' | 'CUSTOMER';
 export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK';
 export type MembershipTier = 'NORMAL' | 'VIP';
 export type OrderStatus = 'PENDING' | 'PAID' | 'CANCELLED';
@@ -25,6 +25,7 @@ export interface User {
   fullName: string;
   role: UserRole;
   active: boolean;
+  customerId?: string | null;
 }
 
 export interface Category {
@@ -93,6 +94,13 @@ export interface DiscountInfo {
   rate: number;
   description: string;
   strategyClass: string;
+}
+
+export interface PromotionConfig {
+  seasonalPromoEnabled: boolean;
+  seasonalPromoName: string;
+  seasonalDiscountRate: number;
+  vipDiscountRate: number;
 }
 
 export interface Payment {

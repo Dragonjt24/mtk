@@ -11,7 +11,17 @@ import java.math.RoundingMode;
  */
 public class VIPDiscountStrategy implements DiscountStrategy {
 
-    private static final BigDecimal RATE = new BigDecimal("0.15");
+    private static final BigDecimal DEFAULT_RATE = new BigDecimal("0.15");
+
+    private final BigDecimal rate;
+
+    public VIPDiscountStrategy() {
+        this(DEFAULT_RATE);
+    }
+
+    public VIPDiscountStrategy(BigDecimal rate) {
+        this.rate = (rate == null || rate.compareTo(BigDecimal.ZERO) <= 0) ? DEFAULT_RATE : rate;
+    }
 
     @Override
     public DiscountType getDiscountType() {
@@ -20,17 +30,18 @@ public class VIPDiscountStrategy implements DiscountStrategy {
 
     @Override
     public BigDecimal getDiscountRate() {
-        return RATE;
+        return rate;
     }
 
     @Override
     public BigDecimal calculateDiscount(BigDecimal originalTotal) {
         ValidationUtil.requireNonNegative(originalTotal, "Tổng tiền đơn hàng");
-        return originalTotal.multiply(RATE).setScale(0, RoundingMode.HALF_UP);
+        return originalTotal.multiply(rate).setScale(0, RoundingMode.HALF_UP);
     }
 
     @Override
     public String getDescription() {
-        return "Ưu đãi thành viên VIP - Giảm 15% tổng đơn hàng";
+        int pct = rate.multiply(new BigDecimal("100")).setScale(0, RoundingMode.HALF_UP).intValue();
+        return "Ưu đãi thành viên VIP - Giảm " + pct + "% tổng đơn hàng";
     }
 }

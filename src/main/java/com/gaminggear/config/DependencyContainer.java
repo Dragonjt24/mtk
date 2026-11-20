@@ -89,7 +89,7 @@ public class DependencyContainer {
         this.productService = new ProductService(productRepository, categoryRepository, storageSync);
         this.customerService = new CustomerService(customerRepository, orderRepository, storageSync);
         this.inventoryService = new InventoryService(productRepository, inventoryLogRepository, appConfig, storageSync);
-        this.orderService = new OrderService(orderRepository, customerRepository, productRepository, discountContext, storageSync);
+        this.orderService = new OrderService(orderRepository, customerRepository, productRepository, discountContext, storageSync, dataStore);
         this.billService = new BillService(billRepository, customerRepository, storageSync);
 
         // Register Observers with Publisher

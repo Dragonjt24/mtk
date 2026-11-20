@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {CheckCircle2, Download, Minus, Plus, Trash2, X} from 'lucide-react';
+import {CheckCircle2, Download, Lock, Minus, Plus, Trash2, UserPlus, X} from 'lucide-react';
 import {javaApi} from '../../api/javaClient';
 import type {
   Bill,
@@ -10,6 +10,8 @@ import type {
   PaymentMethod,
   PricingResult,
   Product,
+  PromotionConfig,
+  User,
 } from '../../types';
 import {
   discountLabel,
@@ -18,8 +20,8 @@ import {
   paymentMethodLabel,
 } from '../../utils/format';
 import {
-  getAvailableDiscountTypes,
-  getDefaultDiscountForCustomer,
+  isCustomerPurchaseEligible,
+  resolveAutomaticDiscount,
 } from '../../utils/storeHelpers';
 
 export interface StoreCartItem {
@@ -30,44 +32,37 @@ export interface StoreCartItem {
 interface CartCheckoutDrawerProps {
   open: boolean;
   cart: StoreCartItem[];
-  customers: Customer[];
-  selectedCustomerId: string;
-  onSelectCustomerId: (id: string) => void;
+  currentUser: User | null;
+  currentCustomer: Customer | null;
+  promotionConfig: PromotionConfig | null;
   onUpdateQty: (productId: string, delta: number) => void;
   onRemoveItem: (productId: string) => void;
   onClearCart: () => void;
   onClose: () => void;
+  onRequireAuth: (mode: 'LOGIN' | 'REGISTER') => void;
   onCheckoutCompleted: (result: {
     order: Order;
     payment: Payment | null;
     bill: Bill | null;
     customer: Customer;
   }) => void;
-  onOpenMyOrders: (customerId: string) => void;
-  onSwitchToAdmin: () => void;
+  onOpenMyOrders: () => void;
 }
 
 export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
   open,
   cart,
-  customers,
-  selectedCustomerId,
-  onSelectCustomerId,
+  currentUser,
+  currentCustomer,
+  promotionConfig,
   onUpdateQty,
   onRemoveItem,
   onClearCart,
   onClose,
+  onRequireAuth,
   onCheckoutCompleted,
   onOpenMyOrders,
-  onSwitchToAdmin,
 }) => {
-  const [customerMode, setCustomerMode] = useState<'EXISTING' | 'NEW'>('EXISTING');
-  const [newName, setNewName] = useState('');
-  const [newPhone, setNewPhone] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newAddress, setNewAddress] = useState('');
-
-  const [discountType, setDiscountType] = useState<DiscountType>('NO_DISCOUNT');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('MOCK_SUCCESS');
   const [pricing, setPricing] = useState<PricingResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -79,23 +74,12 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
     customer: Customer;
   } | null>(null);
 
-  const selectedCustomer = useMemo(
-    () =>
-      customerMode === 'EXISTING'
-        ? customers.find((c) => c.id === selectedCustomerId) ?? customers[0] ?? null
-        : null,
-    [customerMode, customers, selectedCustomerId],
-  );
+  const canCheckout = isCustomerPurchaseEligible(currentUser, currentCustomer);
 
-  const availableDiscounts = useMemo(
-    () => getAvailableDiscountTypes(selectedCustomer),
-    [selectedCustomer],
+  const effectiveDiscountType: DiscountType = useMemo(
+    () => resolveAutomaticDiscount(currentCustomer, promotionConfig),
+    [currentCustomer, promotionConfig],
   );
-
-  // Automatically default discount policy when customer tier changes
-  useEffect(() => {
-    setDiscountType(getDefaultDiscountForCustomer(selectedCustomer));
-  }, [selectedCustomer?.id, selectedCustomer?.membershipTier, customerMode]);
 
   const rawSubtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
@@ -106,7 +90,10 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
     if (!open) return;
     let active = true;
     javaApi
-      .previewPricing(rawSubtotal, discountType)
+      .previewPricing(rawSubtotal, effectiveDiscountType, {
+        customerId: currentCustomer?.id,
+        useAutoPolicy: Boolean(currentCustomer?.id),
+      })
       .then((res) => {
         if (active) setPricing(res);
       })
@@ -116,57 +103,26 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
     return () => {
       active = false;
     };
-  }, [open, rawSubtotal, discountType]);
+  }, [open, rawSubtotal, effectiveDiscountType, currentCustomer?.id, promotionConfig?.seasonalPromoEnabled]);
 
   if (!open) return null;
-
-  const resolveCheckoutCustomer = async (): Promise<Customer> => {
-    if (customerMode === 'EXISTING') {
-      if (!selectedCustomer) {
-        throw new Error('Vui lòng chọn khách hàng.');
-      }
-      return selectedCustomer;
-    }
-
-    const cleanPhone = newPhone.trim();
-    const cleanName = newName.trim();
-    const cleanEmail = newEmail.trim();
-    const cleanAddress = newAddress.trim();
-    if (!cleanName || !cleanPhone || !cleanEmail || !cleanAddress) {
-      throw new Error('Vui lòng điền đầy đủ họ tên, số điện thoại, email và địa chỉ giao hàng.');
-    }
-
-    // Reuse existing customer if phone already registered in Java store
-    const matches = await javaApi.getCustomers(cleanPhone);
-    const exactMatch = matches.find((c) => c.phone === cleanPhone);
-    if (exactMatch) {
-      onSelectCustomerId(exactMatch.id);
-      return exactMatch;
-    }
-
-    const created = await javaApi.createCustomer({
-      fullName: cleanName,
-      phone: cleanPhone,
-      email: cleanEmail,
-      address: cleanAddress,
-      membershipTier: 'NORMAL',
-    });
-    onSelectCustomerId(created.id);
-    return created;
-  };
 
   const handleCheckout = async (payNow: boolean) => {
     if (cart.length === 0) {
       setError('Giỏ hàng đang trống.');
       return;
     }
+    if (!canCheckout || !currentCustomer) {
+      setError('Bạn cần đăng ký hoặc đăng nhập tài khoản khách hàng đầy đủ thông tin trước khi mua hàng.');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
-      const customer = await resolveCheckoutCustomer();
       const order = await javaApi.createOrder({
-        customerId: customer.id,
-        discountType,
+        customerId: currentCustomer.id,
+        useAutoPolicy: true,
         items: cart.map((c) => ({productId: c.product.id, quantity: c.quantity})),
       });
 
@@ -181,7 +137,7 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
         finalOrder = payRes.order;
       }
 
-      const outcome = {order: finalOrder, payment, bill, customer};
+      const outcome = {order: finalOrder, payment, bill, customer: currentCustomer};
       setReceipt(outcome);
       onClearCart();
       onCheckoutCompleted(outcome);
@@ -252,7 +208,7 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
                     <p className="mt-1 text-sm text-slate-300">
                       {receipt.payment
                         ? receipt.payment.message
-                        : 'Đơn hàng đã được tạo ở trạng thái PENDING và đồng bộ sang trang Quản trị.'}
+                        : 'Đơn hàng đã được tạo ở trạng thái PENDING và đồng bộ sang hệ thống quản trị.'}
                     </p>
                   </div>
                 </div>
@@ -272,7 +228,9 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Chính sách áp dụng</span>
-                  <span className="text-slate-200">{receipt.order.discountType}</span>
+                  <span className="text-slate-200">
+                    {discountLabel(receipt.order.discountType, promotionConfig)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Tổng thanh toán</span>
@@ -296,28 +254,15 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const custId = receipt.customer.id;
                     setReceipt(null);
                     onClose();
-                    onOpenMyOrders(custId);
+                    onOpenMyOrders();
                   }}
                   className="whitespace-nowrap shrink-0 flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-700"
                 >
                   Xem Đơn hàng của tôi
                 </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setReceipt(null);
-                  onClose();
-                  onSwitchToAdmin();
-                }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-medium text-sky-400 hover:bg-slate-800"
-              >
-                Mở Cổng Quản trị để kiểm tra đồng bộ kho & hóa đơn →
-              </button>
             </div>
           ) : cart.length === 0 ? (
             <div className="py-16 text-center">
@@ -391,171 +336,124 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Customer Info */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Thông tin người mua
-                  </span>
-                  <div className="flex items-center gap-1 rounded-lg bg-slate-900 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setCustomerMode('EXISTING')}
-                      className={`rounded px-2.5 py-1 text-xs font-medium ${
-                        customerMode === 'EXISTING'
-                          ? 'bg-blue-600 text-white'
-                          : 'text-slate-400 hover:text-slate-100'
-                      }`}
-                    >
-                      Thành viên
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCustomerMode('NEW')}
-                      className={`rounded px-2.5 py-1 text-xs font-medium ${
-                        customerMode === 'NEW'
-                          ? 'bg-blue-600 text-white'
-                          : 'text-slate-400 hover:text-slate-100'
-                      }`}
-                    >
-                      Khách mới
-                    </button>
-                  </div>
-                </div>
-
-                {customerMode === 'EXISTING' ? (
-                  <div>
-                    <label htmlFor="checkout-customer" className="block text-xs text-slate-400">
-                      Chọn tài khoản khách hàng
-                    </label>
-                    <select
-                      id="checkout-customer"
-                      value={selectedCustomer?.id ?? ''}
-                      onChange={(e) => onSelectCustomerId(e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                    >
-                      {customers.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.fullName} ({c.membershipTier} · {c.phone})
-                        </option>
-                      ))}
-                    </select>
-                    {selectedCustomer && (
-                      <p className="mt-1.5 text-xs text-slate-400">
-                        Giao tới: {selectedCustomer.address} · Hạng {selectedCustomer.membershipTier}
+              {/* Mandatory Customer Authentication Gate */}
+              {!canCheckout ? (
+                <div className="rounded-xl border border-amber-700/60 bg-amber-950/20 p-5 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Lock className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-100">
+                        {currentUser && currentUser.role !== 'CUSTOMER'
+                          ? 'Vui lòng dùng tài khoản Khách hàng để đặt mua'
+                          : 'Yêu cầu đăng ký hoặc đăng nhập tài khoản để mua hàng'}
+                      </h3>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                        {currentUser && currentUser.role !== 'CUSTOMER'
+                          ? 'Bạn đang đăng nhập bằng tài khoản Quản trị / Nhân viên. Để đặt hàng trên Cửa hàng, hãy đăng nhập tài khoản Khách hàng hoặc đăng ký tài khoản mới.'
+                          : 'Khách hàng cần đăng ký tài khoản với đầy đủ họ tên, số điện thoại, email và địa chỉ giao hàng (hoặc đăng nhập nếu đã có tài khoản) trước khi thanh toán. Giỏ hàng hiện tại của bạn sẽ được giữ nguyên.'}
                       </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="guest-name" className="block text-xs text-slate-400">
-                        Họ và tên
-                      </label>
-                      <input
-                        id="guest-name"
-                        type="text"
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        placeholder="Nguyễn Văn A"
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="guest-phone" className="block text-xs text-slate-400">
-                        Số điện thoại
-                      </label>
-                      <input
-                        id="guest-phone"
-                        type="tel"
-                        value={newPhone}
-                        onChange={(e) => setNewPhone(e.target.value)}
-                        placeholder="0909123456"
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="guest-email" className="block text-xs text-slate-400">
-                        Email
-                      </label>
-                      <input
-                        id="guest-email"
-                        type="email"
-                        value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
-                        placeholder="khach@gmail.com"
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="guest-address" className="block text-xs text-slate-400">
-                        Địa chỉ nhận hàng
-                      </label>
-                      <input
-                        id="guest-address"
-                        type="text"
-                        value={newAddress}
-                        onChange={(e) => setNewAddress(e.target.value)}
-                        placeholder="Quận 1, TP.HCM"
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                      />
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Discount Policy */}
-              <div>
-                <label htmlFor="checkout-discount" className="block text-xs font-medium text-slate-400">
-                  Ưu đãi áp dụng (Java Strategy)
-                </label>
-                <select
-                  id="checkout-discount"
-                  value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value as DiscountType)}
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-                >
-                  {availableDiscounts.map((type) => (
-                    <option key={type} value={type}>
-                      {discountLabel(type)}
-                    </option>
-                  ))}
-                </select>
-                {selectedCustomer?.membershipTier !== 'VIP' && (
-                  <p className="mt-1 text-xs text-slate-500">
-                    Ưu đãi VIP (15%) chỉ mở cho khách hàng hạng VIP; bạn có thể chọn Khuyến mãi mùa (20%).
-                  </p>
-                )}
-              </div>
-
-              {/* Payment Method */}
-              <div>
-                <span className="block text-xs font-medium text-slate-400">
-                  Phương thức thanh toán
-                </span>
-                <div className="mt-1.5 space-y-2">
-                  {(['MOCK_SUCCESS', 'COD', 'MOCK_FAILURE'] as PaymentMethod[]).map((method) => (
-                    <label
-                      key={method}
-                      className={`flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm ${
-                        paymentMethod === method
-                          ? 'border-blue-500 bg-blue-950/30 text-slate-100'
-                          : 'border-slate-800 bg-slate-900/70 text-slate-300'
-                      }`}
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onRequireAuth('REGISTER');
+                      }}
+                      className="inline-flex whitespace-nowrap shrink-0 flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
                     >
-                      <span>{paymentMethodLabel(method)}</span>
-                      <input
-                        type="radio"
-                        name="storePaymentMethod"
-                        value={method}
-                        checked={paymentMethod === method}
-                        onChange={() => setPaymentMethod(method)}
-                        className="accent-blue-500"
-                      />
-                    </label>
-                  ))}
+                      <UserPlus className="h-4 w-4" />
+                      Đăng ký tài khoản
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onRequireAuth('LOGIN');
+                      }}
+                      className="whitespace-nowrap shrink-0 flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-700"
+                    >
+                      Đăng nhập
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* Verified Authenticated Customer Info */}
+                  <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        Thông tin người nhận hàng
+                      </span>
+                      <span className="text-xs font-semibold text-sky-400">
+                        Hạng {currentCustomer?.membershipTier}
+                      </span>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-100">
+                      {currentCustomer?.fullName} · {currentCustomer?.phone}
+                    </p>
+                    <p className="text-xs text-slate-400">{currentCustomer?.email}</p>
+                    <p className="text-xs text-slate-300">Giao tới: {currentCustomer?.address}</p>
+                  </div>
+
+                  {/* Admin-Controlled Automatic Discount Policy */}
+                  <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-slate-400">
+                        Ưu đãi áp dụng tự động
+                      </span>
+                      <span
+                        className={`text-xs font-semibold ${
+                          effectiveDiscountType === 'SEASONAL'
+                            ? 'text-amber-400'
+                            : effectiveDiscountType === 'VIP'
+                              ? 'text-sky-400'
+                              : 'text-slate-400'
+                        }`}
+                      >
+                        {discountLabel(effectiveDiscountType, promotionConfig)}
+                      </span>
+                    </div>
+                    <p className="text-xs leading-relaxed text-slate-300">
+                      {promotionConfig?.seasonalPromoEnabled
+                        ? `Quản trị viên đang kích hoạt "${promotionConfig.seasonalPromoName}" — Toàn bộ tài khoản đều được áp dụng giảm ${Math.round(promotionConfig.seasonalDiscountRate * 100)}%.`
+                        : currentCustomer?.membershipTier === 'VIP'
+                          ? `Áp dụng mặc định ưu đãi hạng thành viên VIP (-${Math.round((promotionConfig?.vipDiscountRate ?? 0.15) * 100)}%).`
+                          : 'Tài khoản thường mặc định không giảm giá (0%). Khi Admin bật chương trình ưu đãi theo mùa, toàn bộ tài khoản sẽ tự động được áp dụng.'}
+                    </p>
+                  </div>
+
+                  {/* Payment Method */}
+                  <div>
+                    <span className="block text-xs font-medium text-slate-400">
+                      Phương thức thanh toán
+                    </span>
+                    <div className="mt-1.5 space-y-2">
+                      {(['MOCK_SUCCESS', 'COD', 'MOCK_FAILURE'] as PaymentMethod[]).map((method) => (
+                        <label
+                          key={method}
+                          className={`flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm ${
+                            paymentMethod === method
+                              ? 'border-blue-500 bg-blue-950/30 text-slate-100'
+                              : 'border-slate-800 bg-slate-900/70 text-slate-300'
+                          }`}
+                        >
+                          <span>{paymentMethodLabel(method)}</span>
+                          <input
+                            type="radio"
+                            name="storePaymentMethod"
+                            value={method}
+                            checked={paymentMethod === method}
+                            onChange={() => setPaymentMethod(method)}
+                            className="accent-blue-500"
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Live Java Strategy Total */}
               <div className="space-y-1.5 rounded-xl border border-slate-800 bg-[#111827] p-4 text-sm">
@@ -591,7 +489,7 @@ export const CartCheckoutDrawer: React.FC<CartCheckoutDrawerProps> = ({
           )}
         </div>
 
-        {!receipt && cart.length > 0 && (
+        {!receipt && cart.length > 0 && canCheckout && (
           <div className="border-t border-slate-800 bg-[#0B0F19] p-5 flex flex-wrap gap-3">
             <button
               type="button"

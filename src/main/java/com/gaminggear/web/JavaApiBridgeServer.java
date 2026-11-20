@@ -14,6 +14,7 @@ import com.gaminggear.model.Customer;
 import com.gaminggear.model.Order;
 import com.gaminggear.model.Payment;
 import com.gaminggear.model.Product;
+import com.gaminggear.model.PromotionConfig;
 import com.gaminggear.model.User;
 import com.gaminggear.model.enums.MembershipTier;
 import com.gaminggear.model.enums.OrderStatus;
@@ -110,6 +111,20 @@ public class JavaApiBridgeServer {
                 sendJson(exchange, 200, sanitizeUser(user));
                 return;
             }
+            if ("/api/java/auth/register".equals(path) && "POST".equals(method)) {
+                JsonNode body = readJson(exchange);
+                User created = container.getAuthService().registerCustomer(
+                        text(body, "username"),
+                        text(body, "password"),
+                        text(body, "fullName"),
+                        text(body, "phone"),
+                        text(body, "email"),
+                        text(body, "address"),
+                        container.getCustomerService()
+                );
+                sendJson(exchange, 201, sanitizeUser(created));
+                return;
+            }
             if ("/api/java/auth/logout".equals(path) && "POST".equals(method)) {
                 container.getAuthService().logout();
                 sendJson(exchange, 200, Map.of("loggedOut", true));
@@ -144,6 +159,27 @@ public class JavaApiBridgeServer {
                 JsonNode body = readJson(exchange);
                 container.getAuthService().changePassword(id, text(body, "newPassword"));
                 sendJson(exchange, 200, Map.of("updated", true));
+                return;
+            }
+            if ("/api/java/auth/profile".equals(path) && "PUT".equals(method)) {
+                JsonNode body = readJson(exchange);
+                User updatedUser = container.getAuthService().updateProfile(
+                        text(body, "userId"),
+                        text(body, "fullName"),
+                        text(body, "phone"),
+                        text(body, "email"),
+                        text(body, "address"),
+                        text(body, "newPassword"),
+                        container.getCustomerService()
+                );
+                Customer updatedCustomer = null;
+                if (updatedUser.getCustomerId() != null && !updatedUser.getCustomerId().isBlank()) {
+                    updatedCustomer = container.getCustomerService().getCustomerById(updatedUser.getCustomerId());
+                }
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("user", sanitizeUser(updatedUser));
+                result.put("customer", updatedCustomer);
+                sendJson(exchange, 200, result);
                 return;
             }
 
@@ -307,11 +343,12 @@ public class JavaApiBridgeServer {
                 return;
             }
 
-            // DISCOUNTS (Factory + Strategy metadata)
+            // DISCOUNTS & PROMOTIONS (Factory + Strategy metadata + Admin Policy)
             if ("/api/java/discounts".equals(path) && "GET".equals(method)) {
+                PromotionConfig config = container.getOrderService().getPromotionConfig();
                 List<Map<String, Object>> list = new ArrayList<>();
                 for (DiscountType type : DiscountType.values()) {
-                    DiscountStrategy strategy = DiscountFactory.createStrategy(type);
+                    DiscountStrategy strategy = DiscountFactory.createStrategy(type, config);
                     Map<String, Object> item = new LinkedHashMap<>();
                     item.put("type", type.name());
                     item.put("displayName", type.getDisplayName());
@@ -321,6 +358,21 @@ public class JavaApiBridgeServer {
                     list.add(item);
                 }
                 sendJson(exchange, 200, list);
+                return;
+            }
+            if ("/api/java/promotions".equals(path) && "GET".equals(method)) {
+                sendJson(exchange, 200, container.getOrderService().getPromotionConfig());
+                return;
+            }
+            if ("/api/java/promotions".equals(path) && "PUT".equals(method)) {
+                JsonNode body = readJson(exchange);
+                boolean enabled = body.path("seasonalPromoEnabled").asBoolean(false);
+                String name = text(body, "seasonalPromoName");
+                BigDecimal seasonalRate = parseRequiredBigDecimal(body, "seasonalDiscountRate");
+                BigDecimal vipRate = parseRequiredBigDecimal(body, "vipDiscountRate");
+                PromotionConfig updated = container.getOrderService()
+                        .updatePromotionConfig(enabled, name, seasonalRate, vipRate);
+                sendJson(exchange, 200, updated);
                 return;
             }
 
@@ -335,14 +387,17 @@ public class JavaApiBridgeServer {
             if ("/api/java/orders/preview-pricing".equals(path) && "POST".equals(method)) {
                 JsonNode body = readJson(exchange);
                 BigDecimal original = parseRequiredBigDecimal(body, "originalTotal");
-                DiscountType type = parseDiscountType(text(body, "discountType"));
+                boolean useAutoPolicy = body.path("useAutoPolicy").asBoolean(false);
+                DiscountType type = useAutoPolicy
+                        ? container.getOrderService().resolveAutomaticDiscountTypeForCustomerId(text(body, "customerId"))
+                        : parseDiscountType(text(body, "discountType"));
                 sendJson(exchange, 200, container.getOrderService().previewPricing(original, type));
                 return;
             }
             if ("/api/java/orders".equals(path) && "POST".equals(method)) {
                 JsonNode body = readJson(exchange);
                 String customerId = text(body, "customerId");
-                DiscountType discountType = parseDiscountType(text(body, "discountType"));
+                boolean useAutoPolicy = body.path("useAutoPolicy").asBoolean(false);
                 List<OrderService.OrderLineRequest> lines = new ArrayList<>();
                 if (body.has("items") && body.get("items").isArray()) {
                     for (JsonNode n : body.get("items")) {
@@ -352,7 +407,13 @@ public class JavaApiBridgeServer {
                         ));
                     }
                 }
-                Order created = container.getOrderService().createOrder(customerId, lines, discountType);
+                Order created;
+                if (useAutoPolicy || text(body, "discountType").isBlank()) {
+                    created = container.getOrderService().createOrderWithAutoPolicy(customerId, lines);
+                } else {
+                    DiscountType discountType = parseDiscountType(text(body, "discountType"));
+                    created = container.getOrderService().createOrder(customerId, lines, discountType);
+                }
                 sendJson(exchange, 201, created);
                 return;
             }
@@ -497,6 +558,7 @@ public class JavaApiBridgeServer {
         map.put("fullName", u.getFullName());
         map.put("role", u.getRole().name());
         map.put("active", u.isActive());
+        map.put("customerId", u.getCustomerId());
         return map;
     }
 
